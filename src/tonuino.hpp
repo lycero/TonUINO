@@ -16,6 +16,8 @@ public:
 
   void setup          ();
   void loop           ();
+  void readInput      ();
+  void readCard       ();
 
   void playFolder     ();
   void playTrackNumber();

@@ -238,6 +238,11 @@ void Chip_card::sleepCard() {
     mfrc522.PCD_SoftPowerDown();
 }
 
+void Chip_card::wakeCard() {
+    mfrc522.PCD_SoftPowerUp();
+    mfrc522.PCD_AntennaOn();
+}
+
 void Chip_card::initCard() {
   SPI.begin();        // Init SPI bus
 	mfrc522.PCD_Init(); // Init MFRC522
@@ -253,6 +258,9 @@ void Chip_card::stopCrypto1() {
 }
 
 cardEvent Chip_card::getCardEvent() {
+
+  wakeCard();
+
   byte bufferATQA[2];
   byte bufferSize = sizeof(bufferATQA);
   MFRC522::StatusCode result = mfrc522.PICC_RequestA(bufferATQA, &bufferSize);
@@ -269,6 +277,7 @@ cardEvent Chip_card::getCardEvent() {
       LOG(card_log, s_info, F("Card Removed"));
       cardRemoved = true;
       stopCard();
+      sleepCard();
       return cardEvent::removed;
     }
   }
@@ -279,6 +288,8 @@ cardEvent Chip_card::getCardEvent() {
       return cardEvent::inserted;
     }
   }
+  
+  sleepCard();
   return cardEvent::none;
 }
 

@@ -5,7 +5,10 @@
 #include "src/buttons.hpp"
 #include "src/logger.hpp"
 #include "src/constants.hpp"
-
+#include "src/chip_card.hpp"
+#include <avr/sleep.h>
+#include <avr/power.h>
+#include <avr/wdt.h>
 
 /*
    _____         _____ _____ _____ _____
@@ -19,8 +22,14 @@
     Information and contribution at https://tonuino.de.
 */
 
-void setup() {
+volatile bool toggle = true;
+// Watchdog timer Interrupt Service Routine
+ISR(WDT_vect)
+{
+    toggle = true;
+}
 
+void setup() {
   Serial.begin(115200); // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
 
   // Wert für randomSeed() erzeugen durch das mehrfache Sammeln von rauschenden LSBs eines offenen Analogeingangs
@@ -42,10 +51,45 @@ void setup() {
   LOG(init_log, s_info , F("refactored by Boerge1."));
   LOG(init_log, s_debug, F("Information and contribution at https://tonuino.de.\n"));
 
-  Tonuino::getTonuino().setup();
+  Tonuino::getTonuino().setup(); 
+  
+  //watchdog initialisieren
+  MCUSR &= ~(1<<WDRF);
+  WDTCSR = (1<<WDCE) | (1<<WDE);
+  WDTCSR = 1<<WDP1 | 1<<WDP0; // timeout 125ms
+  //WDTCSR = 1<<WDP3 | 1<<WDP0; // timeout 8s
+  WDTCSR |= 1<<WDIE;
+  digitalWrite(6, HIGH);
 }
 
+void enterSleep(){
+  wdt_reset();
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  sleep_enable();
+  power_adc_disable();
+  power_spi_disable();
+  power_timer0_disable();
+  power_timer2_disable();
+  power_twi_disable();
+  interrupts ();
+  sleep_cpu (); 
+  sleep_disable();
+  power_all_enable();
+}
+int countDFPower = 0;
 void loop() {
+if( toggle){
+  toggle = false;
+  // if(countDFPower > 64){
+  //   digitalWrite(6, HIGH);
+  //   countDFPower = 0;
+  // }
+  // else if( countDFPower > 32){
+  //   digitalWrite(6, LOW);
+  // }
+  // countDFPower++;
 
   Tonuino::getTonuino().loop();
+  enterSleep();
+}
 }

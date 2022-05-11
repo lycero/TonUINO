@@ -37,7 +37,7 @@ void Settings::resetSettings() {
   version             =  2;
   maxVolume           = 25;
   minVolume           =  5;
-  initVolume          = 15;
+  initVolume          = 20;
   eq                  =  1;
   locked              = false;
   standbyTimer        =  0;

@@ -85,6 +85,7 @@ public:
   bool readCard (      nfcTagObject &nfcTag);
   bool writeCard(const nfcTagObject &nfcTag);
   void sleepCard();
+  void wakeCard();
   void initCard ();
   cardEvent getCardEvent();
   bool isCardRemoved() { return cardRemoved; }

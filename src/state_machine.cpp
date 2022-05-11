@@ -717,6 +717,7 @@ void Play::entry() {
   LOG(state_log, s_info, str_enter(), str_Play());
   tonuino.disableStandbyTimer();
   mp3.start();
+  digitalWrite(6, LOW);
 };
 
 void Play::react(command_e const &cmd_e) {

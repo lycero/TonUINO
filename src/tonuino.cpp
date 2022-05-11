@@ -44,22 +44,47 @@ void Tonuino::setup() {
   SM_tonuino::dispatch(command_e(commandRaw::start));
 }
 
+void Tonuino::readInput(){
+ SM_tonuino::dispatch(command_e(commands.getCommandRaw()));
+}
+
+void Tonuino::readCard(){
+   SM_tonuino::dispatch(card_e(chip_card.getCardEvent()));
+}
+
+int toggleCardReader = 0;
+int toggleMp3Sleep = 0;
 void Tonuino::loop() {
 
-  unsigned long  start_cycle = millis();
-  checkStandby();
+  //unsigned long  start_cycle = millis();
+  //checkStandby();
 
   mp3.loop();
+if(mp3.isPlaying()){
+  toggleMp3Sleep = 0;
+}
+  if(!mp3.isPlaying() && toggleMp3Sleep >= 0){
+    toggleMp3Sleep++;
+  }
+  if(toggleMp3Sleep > 128){
+    toggleMp3Sleep = -1;
+    digitalWrite(6, HIGH);    
+  }
 
   activeModifier->loop();
 
   SM_tonuino::dispatch(command_e(commands.getCommandRaw()));
+
+   if(toggleCardReader > 3){ 
+    toggleCardReader = 0;
   SM_tonuino::dispatch(card_e(chip_card.getCardEvent()));
+  }
+  toggleCardReader++;
 
   unsigned long  stop_cycle = millis();
 
-  if (stop_cycle-start_cycle < cycleTime)
-    delay(cycleTime - (stop_cycle - start_cycle));
+  // if (stop_cycle-start_cycle < cycleTime)
+  //   delay(cycleTime - (stop_cycle - start_cycle));
 }
 
 void Tonuino::playFolder() {
