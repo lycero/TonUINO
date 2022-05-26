@@ -6,6 +6,7 @@
 #include "mp3.hpp"
 #include "constants.hpp"
 #include "logger.hpp"
+#include "chip_card_ISO_14443_4.hpp"
 
 // select whether StatusCode and PiccType are printed as names
 // that uses about 690 bytes or 2.2% of flash
@@ -79,6 +80,9 @@ Chip_card::Chip_card(Mp3 &mp3)
 bool Chip_card::auth(MFRC522::PICC_Type piccType) {
   MFRC522::StatusCode status = MFRC522::STATUS_ERROR;
 
+  if(piccType == MFRC522::PICC_TYPE_ISO_14443_4) //no auth for this type
+    return true;
+
   // Authenticate using key A
   if ((piccType == MFRC522::PICC_TYPE_MIFARE_MINI) ||
       (piccType == MFRC522::PICC_TYPE_MIFARE_1K  ) ||
@@ -113,7 +117,13 @@ bool Chip_card::readCard(nfcTagObject &nfcTag) {
   byte buffer[buffferSizeRead];
   MFRC522::StatusCode status = MFRC522::STATUS_ERROR;
 
-  if (not auth(piccType))
+  if (piccType == MFRC522::PICC_TYPE_ISO_14443_4)
+  {
+      status = MFRC522::STATUS_OK;
+      if (!Chip_card_ISO_14443_4::readCard(mfrc522, buffer))
+          return false;
+  }
+  else if (not auth(piccType))
     return false;
 
   // Show the whole sector as it currently is
@@ -145,7 +155,9 @@ bool Chip_card::readCard(nfcTagObject &nfcTag) {
       memcpy(buffer+bufpos, buffer2, 4);
     }
   }
-  stopCrypto1();
+
+  if (piccType != MFRC522::PICC_TYPE_ISO_14443_4)
+    stopCrypto1();
 
   if (status != MFRC522::STATUS_OK) {
     LOG(card_log, s_error, str_MIFARE_Read(), str_failed(), printStatusCode(mfrc522, status));
