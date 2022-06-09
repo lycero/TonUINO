@@ -5,7 +5,9 @@
 #include "src/buttons.hpp"
 #include "src/logger.hpp"
 #include "src/constants.hpp"
-
+#include <avr/sleep.h>
+#include <avr/power.h>
+#include <avr/wdt.h>
 
 /*
    _____         _____ _____ _____ _____
@@ -18,6 +20,14 @@
     refactored by Boerge1
     Information and contribution at https://tonuino.de.
 */
+
+volatile bool toggle = true;
+// Watchdog timer Interrupt Service Routine
+ISR(WDT_vect)
+{
+    toggle = true;
+}
+
 
 void setup() {
 
@@ -43,9 +53,34 @@ void setup() {
   LOG(init_log, s_debug, F("Information and contribution at https://tonuino.de.\n"));
 
   Tonuino::getTonuino().setup();
+
+    //watchdog initialisieren
+  MCUSR &= ~(1<<WDRF);
+  WDTCSR = (1<<WDCE) | (1<<WDE);
+  WDTCSR = 1<<WDP1 | 1<<WDP0; // timeout 125ms
+  WDTCSR |= 1<<WDIE;
+}
+
+void enterSleep(){
+  wdt_reset();
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  sleep_enable();
+  power_adc_disable();
+  power_spi_disable();
+  power_timer0_disable();
+  power_timer2_disable();
+  power_twi_disable();
+  interrupts ();
+  sleep_cpu (); 
+  sleep_disable();
+  power_all_enable();
+  updatemillis(125);
 }
 
 void loop() {
-
-  Tonuino::getTonuino().loop();
+  // if(toggle){
+  //   toggle = false;
+    Tonuino::getTonuino().loop();
+  //   enterSleep();
+  // }
 }

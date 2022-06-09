@@ -51,7 +51,7 @@ inline constexpr uint8_t       dfPlayer_receivePin      = 2;
 inline constexpr uint8_t       dfPlayer_transmitPin     = 3;
 inline constexpr uint8_t       dfPlayer_busyPin         = 4;
 inline constexpr levelType     dfPlayer_busyPinType     = levelType::activeHigh;
-inline constexpr unsigned long dfPlayer_timeUntilStarts = 500;
+inline constexpr unsigned long dfPlayer_timeUntilStarts = 2000;
 
 
 // ####### tonuino #####################################
