@@ -5,8 +5,8 @@
 
 DEFINE_LOGGER(tonuino_log , s_debug, void);
 
-DEFINE_LOGGER(init_log    , s_info, tonuino_log);
-DEFINE_LOGGER(card_log    , s_info, tonuino_log);
+DEFINE_LOGGER(init_log    , s_debug, tonuino_log);
+DEFINE_LOGGER(card_log    , s_debug, tonuino_log);
 DEFINE_LOGGER(play_log    , s_info, tonuino_log);
 DEFINE_LOGGER(standby_log , s_info, tonuino_log);
 DEFINE_LOGGER(state_log   , s_info, tonuino_log);

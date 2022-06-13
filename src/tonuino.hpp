@@ -6,8 +6,10 @@
 #include "buttons.hpp"
 #include "serial_input.hpp"
 #include "mp3.hpp"
+#include "chip_card_v3.hpp"
 #include "modifier.hpp"
 #include "timer.hpp"
+
 
 class Tonuino {
 public:

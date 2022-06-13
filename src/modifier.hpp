@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#include "chip_card.hpp"
+#include "chip_card_v3.hpp"
 #include "logger.hpp"
 #include "timer.hpp"
 

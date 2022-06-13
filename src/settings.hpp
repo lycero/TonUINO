@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 #include "array.hpp"
-#include "chip_card.hpp"
+#include "chip_card_v3.hpp"
 
 // admin settings stored in eeprom
 struct Settings {

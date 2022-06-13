@@ -3,7 +3,7 @@
 
 #include "tinyfsm.hpp"
 #include "commands.hpp"
-#include "chip_card.hpp"
+#include "chip_card_v3.hpp"
 #include "mp3.hpp"
 #include "timer.hpp"
 

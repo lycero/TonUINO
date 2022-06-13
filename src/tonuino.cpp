@@ -4,7 +4,7 @@
 #include <avr/sleep.h>
 
 #include "array.hpp"
-#include "chip_card.hpp"
+#include "chip_card_v3.hpp"
 
 #include "constants.hpp"
 #include "logger.hpp"
@@ -23,14 +23,16 @@ void Tonuino::setup() {
   // load Settings from EEPROM
   settings.loadSettingsFromFlash();
 
+  delay(50);
   // DFPlayer Mini initialisieren
   mp3.begin();
-  // Zwei Sekunden warten bis der DFPlayer Mini initialisiert ist
+  // // Zwei Sekunden warten bis der DFPlayer Mini initialisiert ist
   delay(2000);
   mp3.setVolume();
   mp3.setEq(static_cast<DfMp3_Eq>(settings.eq - 1));
 
   // NFC Leser initialisieren
+  delay(50);
   chip_card.initCard();
 
   // RESET --- ALLE DREI KNÖPFE BEIM STARTEN GEDRÜCKT HALTEN -> alle EINSTELLUNGEN werden gelöscht
@@ -51,10 +53,14 @@ void Tonuino::loop() {
 
   mp3.loop();
 
+  delay(50);
+
   activeModifier->loop();
 
   SM_tonuino::dispatch(command_e(commands.getCommandRaw()));
+  chip_card.wakeCard();
   SM_tonuino::dispatch(card_e(chip_card.getCardEvent()));
+  chip_card.sleepCard();
 
   unsigned long  stop_cycle = millis();
 

@@ -1,9 +1,10 @@
-#ifndef SRC_CHIP_CARD_HPP_
-#define SRC_CHIP_CARD_HPP_
+#ifndef SRC_CHIP_CARD_V3_HPP_
+#define SRC_CHIP_CARD_V3_HPP_
 
 #include <stdint.h>
 
-#include <MFRC522.h>
+#include <PN532.h>
+#include <PN532_HSU.h>
 
 #include "constants.hpp"
 
@@ -81,10 +82,10 @@ private:
 class Chip_card {
 public:
   Chip_card(Mp3 &mp3);
-
   bool readCard (      nfcTagObject &nfcTag);
   bool writeCard(const nfcTagObject &nfcTag);
   void sleepCard();
+  void wakeCard();
   void initCard ();
   cardEvent getCardEvent();
   bool isCardRemoved() { return cardRemoved; }
@@ -92,16 +93,18 @@ public:
 private:
   void stopCrypto1();
   void stopCard ();
-  bool auth(MFRC522::PICC_Type piccType);
+  //bool auth(MFRC522::PICC_Type piccType);
 
-  MFRC522             mfrc522;
   Mp3                 &mp3;
+  
+  PN532_HSU           pn532hsu;
+  PN532               pn532;
 
   delayedSwitchOn     cardRemovedSwitch;
   bool                cardRemoved = true;
+
+  uint8_t uid[7] = {0, 0, 0, 0, 0, 0, 0};
+  uint8_t uidLength;
 };
 
-
-
-
-#endif /* SRC_CHIP_CARD_HPP_ */
+#endif /* SRC_CHIP_CARD_V3_HPP_ */

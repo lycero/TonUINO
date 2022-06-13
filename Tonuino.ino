@@ -9,6 +9,7 @@
 #include <avr/power.h>
 #include <avr/wdt.h>
 
+
 /*
    _____         _____ _____ _____ _____
   |_   _|___ ___|  |  |     |   | |     |
@@ -28,11 +29,9 @@ ISR(WDT_vect)
     toggle = true;
 }
 
-
 void setup() {
 
   Serial.begin(115200); // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
-
   // Wert für randomSeed() erzeugen durch das mehrfache Sammeln von rauschenden LSBs eines offenen Analogeingangs
   uint32_t ADC_LSB = 0;
   uint32_t ADCSeed = 0;
@@ -42,7 +41,7 @@ void setup() {
   }
   randomSeed(ADCSeed); // Zufallsgenerator initialisieren
 
-  // Dieser Hinweis darf nicht entfernt werden
+  // // Dieser Hinweis darf nicht entfernt werden
   LOG(init_log, s_debug, F(" _____         _____ _____ _____ _____"));
   LOG(init_log, s_debug, F("|_   _|___ ___|  |  |     |   | |     |"));
   LOG(init_log, s_debug, F("  | | | . |   |  |  |-   -| | | |  |  |"));
@@ -51,13 +50,14 @@ void setup() {
   LOG(init_log, s_info , F("created by Thorsten Voß and licensed under GNU/GPL."));
   LOG(init_log, s_info , F("refactored by Boerge1."));
   LOG(init_log, s_debug, F("Information and contribution at https://tonuino.de.\n"));
-
+  
+  delay(50);
   Tonuino::getTonuino().setup();
 
     //watchdog initialisieren
   MCUSR &= ~(1<<WDRF);
   WDTCSR = (1<<WDCE) | (1<<WDE);
-  WDTCSR = 1<<WDP1 | 1<<WDP0; // timeout 125ms
+  WDTCSR = 1<<WDP1 | 1<<WDP0 | 1<<WDP2; // timeout 125ms
   WDTCSR |= 1<<WDIE;
 }
 
@@ -78,9 +78,9 @@ void enterSleep(){
 }
 
 void loop() {
-  // if(toggle){
-  //   toggle = false;
+  if(toggle){
+    toggle = false;
     Tonuino::getTonuino().loop();
-  //   enterSleep();
-  // }
+    enterSleep();
+  }
 }
