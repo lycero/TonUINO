@@ -1,5 +1,7 @@
 */
 !PN532*
+!SoftwareSerialLight*
+!PinChangeInterruptHandler*
 !NDEF*
 
 .DS_Store

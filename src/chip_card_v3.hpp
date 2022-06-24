@@ -91,10 +91,6 @@ public:
   bool isCardRemoved() { return cardRemoved; }
 
 private:
-  void stopCrypto1();
-  void stopCard ();
-  //bool auth(MFRC522::PICC_Type piccType);
-
   Mp3                 &mp3;
   
   PN532_HSU           pn532hsu;
@@ -104,7 +100,8 @@ private:
   bool                cardRemoved = true;
 
   uint8_t uid[7] = {0, 0, 0, 0, 0, 0, 0};
-  uint8_t uidLength;
+  uint8_t uidLength = 0;
+  uint8_t cardType = 0;
 };
 
 #endif /* SRC_CHIP_CARD_V3_HPP_ */

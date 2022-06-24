@@ -2,6 +2,7 @@
 #define SRC_CONSTANTS_HPP_
 
 #include <Arduino.h>
+#include <avr/wdt.h>
 
 // ####### helper for level ############################
 
@@ -23,7 +24,7 @@ inline constexpr int getLevel(levelType t, level l) { return (l == level::inacti
 //#define FIVEBUTTONS
 
 inline constexpr uint32_t buttonLongPress      = 1000; // timeout for long press button in ms
-inline constexpr uint8_t  buttonPausePin       = A0;
+inline constexpr uint8_t  buttonPausePin       = 62;
 inline constexpr uint8_t  buttonUpPin          = A1;
 inline constexpr uint8_t  buttonDownPin        = A2;
 
@@ -32,33 +33,33 @@ inline constexpr uint8_t  buttonFourPin        = A3;
 inline constexpr uint8_t  buttonFivePin        = A4;
 #endif
 
-inline constexpr levelType buttonPinType       = levelType::activeLow;
+inline constexpr levelType buttonPinType       = levelType::activeHigh;
 inline constexpr uint32_t  buttonDbTime        = 25; // Debounce time in milliseconds (default 25ms)
 
 // ####### chip_card ###################################
 
 inline constexpr uint32_t cardCookie           = 0x1337b347;
 inline constexpr uint8_t  cardVersion          = 0x02;
-inline constexpr byte     mfrc522_RSTPin       =  9;          // Configurable, see typical pin layout above
-inline constexpr byte     mfrc522_SSPin        = 10;          // Configurable, see typical pin layout above
-inline constexpr uint8_t  cardRemoveDelay      =  3;
+inline constexpr uint8_t  cardRemoveDelay      =  1;
 
 
 // ####### mp3 #########################################
 
 inline constexpr uint8_t       maxTracksInFolder        = 255;
-inline constexpr uint8_t       dfPlayer_receivePin      = 2;
-inline constexpr uint8_t       dfPlayer_transmitPin     = 3;
-inline constexpr uint8_t       dfPlayer_busyPin         = 4;
+inline constexpr uint8_t       dfPlayer_receivePin      = 51;
+inline constexpr uint8_t       dfPlayer_transmitPin     = 50;
+inline constexpr uint8_t       dfPlayer_busyPin         = 63;
 inline constexpr levelType     dfPlayer_busyPinType     = levelType::activeHigh;
 inline constexpr unsigned long dfPlayer_timeUntilStarts = 2000;
 
 
 // ####### tonuino #####################################
 
-inline constexpr uint8_t   shutdownPin          = 7;
-inline constexpr levelType shutdownPinType      = levelType::activeHigh;
 inline constexpr uint8_t   openAnalogPin        = A7;
 inline constexpr unsigned long cycleTime        = 50;
+inline constexpr uint8_t sleepCycleTime   = WDTO_2S;
+inline constexpr uint8_t deepSleepCycleTime   = WDTO_8S;
+inline constexpr unsigned long awakeTime        = 3000;
+inline constexpr unsigned long lightSleepTime   = 1000;
 
 #endif /* SRC_CONSTANTS_HPP_ */

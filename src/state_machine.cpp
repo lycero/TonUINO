@@ -628,6 +628,7 @@ void Base::handleShortcut(uint8_t shortCut) {
 }
 
 void Base::handleReadCard() {
+  tonuino.ChangePowerState(WakeupSource::CardReader);
   if (lastCardRead.nfcFolderSettings.mode != mode_t::repeat_last)
     tonuino.setCard(lastCardRead);
   if (tonuino.getCard().nfcFolderSettings.folder != 0) {
@@ -640,7 +641,6 @@ void Base::handleReadCard() {
 
 void Idle::entry() {
   LOG(state_log, s_info, str_enter(), str_Idle());
-  tonuino.setStandbyTimer();
 };
 
 void Idle::react(command_e const &cmd_e) {
@@ -715,7 +715,6 @@ void Idle::react(card_e const &c_e) {
 
 void Play::entry() {
   LOG(state_log, s_info, str_enter(), str_Play());
-  tonuino.disableStandbyTimer();
   mp3.start();
 };
 
@@ -797,7 +796,6 @@ void Play::react(card_e const &c_e) {
 
 void Pause::entry() {
   LOG(state_log, s_info, str_enter(), str_Pause());
-  tonuino.setStandbyTimer();
   mp3.pause();
 };
 
@@ -1045,7 +1043,6 @@ void Admin_Allow::react(command_e const &cmd_e) {
 
 void Admin_Entry::entry() {
   LOG(state_log, s_info, str_enter(), str_Admin_Entry());
-  tonuino.disableStandbyTimer();
   tonuino.resetActiveModifier();
 
   numberOfOptions   = 13;

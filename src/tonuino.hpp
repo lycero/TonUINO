@@ -10,6 +10,19 @@
 #include "modifier.hpp"
 #include "timer.hpp"
 
+enum class WakeupSource{
+  None,
+  Watchdog,
+  KeyInput,
+  Mp3BusyChange,
+  CardReader
+};
+
+enum class PowerState{
+  Active,
+  LightSleep,
+  DeepSleep
+};
 
 class Tonuino {
 public:
@@ -17,7 +30,7 @@ public:
   static Tonuino& getTonuino() { static Tonuino tonuino; return tonuino; }
 
   void setup          ();
-  void loop           ();
+  void loop           (WakeupSource source);
 
   void playFolder     ();
   void playTrackNumber();
@@ -27,9 +40,6 @@ public:
 
   void resetActiveModifier   () { activeModifier = &noneModifier; }
   Modifier& getActiveModifier() { return *activeModifier; }
-
-  void setStandbyTimer();
-  void disableStandbyTimer();
 
   void setCard  (const nfcTagObject   &newCard) { myCard = newCard; setFolder(&myCard.nfcFolderSettings); }
   const nfcTagObject& getCard() const           { return myCard; }
@@ -42,9 +52,15 @@ public:
 
 private:
 
-  void checkStandby();
-
+  void ChangePowerState(WakeupSource source);
   bool specialCard(const nfcTagObject &nfcTag);
+  void checkNfc();
+  void checkInputs();
+  void loopMp3();
+  void UpdatePowerState(unsigned long startCycle);
+  void executeSleep();
+  unsigned long getWatchDogMillis();
+  unsigned long getWatchDogMillis(uint8_t time);
 
   Settings             settings            {};
   Mp3                  mp3                 {settings};
@@ -67,11 +83,12 @@ private:
 
   Modifier*            activeModifier      {&noneModifier};
 
-  Timer                standbyTimer        {};
+  Timer                sleepStateTimer     {};
 
   nfcTagObject         myCard              {};
   folderSettings*      myFolder            {&myCard.nfcFolderSettings};
   uint16_t             numTracksInFolder   {};
+  PowerState           powerState          {PowerState::Active};
 };
 
 #endif /* SRC_TONUINO_HPP_ */

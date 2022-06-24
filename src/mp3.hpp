@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <DFMiniMp3.h>
-#include <SoftwareSerial.h>
+#include <SoftwareSerialLight.h>
 
 #include "settings.hpp"
 #include "queue.hpp"
