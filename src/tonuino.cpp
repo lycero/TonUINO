@@ -51,11 +51,14 @@ void Tonuino::setup()
 
   sleepStateTimer.start(awakeTime);
 
-  //watchdog initialisieren
-  MCUSR &= ~(1<<WDRF);
-  WDTCSR = (1<<WDCE) | (1<<WDE);
+  wdt_reset();
+  cli();
+  MCUSR &= ~(1 << WDRF);
+  WDTCSR = (1 << WDCE) | (1 << WDE);
   WDTCSR = sleepCycleTime;
-  WDTCSR |= 1<<WDIE;
+  WDTCSR |= 1 << WDIE;
+  sei();
+  wdt_reset();
 }
 
 void Tonuino::loop(WakeupSource source)
@@ -237,7 +240,7 @@ bool Tonuino::specialCard(const nfcTagObject &nfcTag)
 
 void Tonuino::checkNfc()
 {
-  if (powerState == PowerState::DeepSleep)
+  if (powerState > PowerState::LightSleep)
     return;
 
   chip_card.wakeCard();
@@ -255,7 +258,7 @@ void Tonuino::checkInputs()
 
 void Tonuino::loopMp3()
 {
-  if (powerState == PowerState::DeepSleep)
+  if (powerState == PowerState::VeryDeepSleep)
     return;
 
   mp3.loop();
@@ -263,7 +266,8 @@ void Tonuino::loopMp3()
 }
 
 void Tonuino::ChangePowerState(WakeupSource source)
-{
+{ 
+  wdt_reset();
   switch (source)
   {
   case WakeupSource::None:
@@ -272,28 +276,24 @@ void Tonuino::ChangePowerState(WakeupSource source)
     break;
   case WakeupSource::Watchdog:
     updatemillis(getWatchDogMillis());
-    LOG(powerstate_log, s_debug, F("Watchdog"));
-    /* code */
+    LOG(powerstate_log, s_debug, F("Watchdog:"), millis());
     break;
   case WakeupSource::KeyInput:
-  case WakeupSource::CardReader:    
-    wdt_reset();
-    LOG(powerstate_log, s_debug, F("Key -> Active"));
-    powerState = PowerState::Active;
-    sleepStateTimer.start(awakeTime);
-    /* code */
+  case WakeupSource::CardReader:
+    HandlePowerStateChange(PowerState::Active, powerState);
     break;
   case WakeupSource::Mp3BusyChange:
-    LOG(powerstate_log, s_debug, F("Mp3BusyChange -> Active"));
-    powerState = PowerState::Active;
-    sleepStateTimer.start(awakeTime);
-    /* code */
+    //if (powerState == PowerState::VeryDeepSleep)
+    {
+      HandlePowerStateChange(PowerState::Mp3Awake, powerState);
+    }
     break;
 
   default:
     break;
   }
 }
+
 void Tonuino::UpdatePowerState(unsigned long startCycle)
 {
   switch (powerState)
@@ -302,11 +302,7 @@ void Tonuino::UpdatePowerState(unsigned long startCycle)
   {
     if (sleepStateTimer.isExpired())
     {
-      powerState = PowerState::LightSleep;
-      sleepStateTimer.start(lightSleepTime);
-      wdt_reset();
-      //wdt_enable(sleepCycleTime);
-      LOG(powerstate_log, s_debug, F("Active -> LightSleep"));
+      HandlePowerStateChange(PowerState::LightSleep, powerState);
     }
     else
     {
@@ -320,28 +316,123 @@ void Tonuino::UpdatePowerState(unsigned long startCycle)
   {
     if (sleepStateTimer.isExpired())
     {
-      powerState = PowerState::DeepSleep;
-      wdt_reset();
-      //wdt_enable(deepSleepCycleTime);
-      LOG(powerstate_log, s_debug, F("LightSleep -> DeepSleep"));
-      delay(50);
+      HandlePowerStateChange(PowerState::DeepSleep, powerState);
+    }
+    break;
+  }
+  case PowerState::Mp3Awake:
+  {
+    if (sleepStateTimer.isExpired())
+    {
+      HandlePowerStateChange(PowerState::DeepSleep, powerState);
+    }
+    else
+    {
+      unsigned long stop_cycle = millis();
+      if (stop_cycle - startCycle < cycleTime)
+        delay(cycleTime - (stop_cycle - startCycle));
+      return;
     }
     break;
   }
   case PowerState::DeepSleep:
-    /* code */    
+    if (sleepStateTimer.isExpired() && !mp3.isPlaying())
+    {
+      HandlePowerStateChange(PowerState::VeryDeepSleep, powerState);
+    }
     break;
   default:
     break;
   }
 
-  if(powerState != PowerState::Active)
-    executeSleep();
+  executeSleep();
+}
+
+void Tonuino::HandlePowerStateChange(PowerState newState, PowerState oldState)
+{
+  if (newState == oldState)
+    return;
+  powerState = newState;
+
+  wdt_reset();
+  logPowerStateChange(newState, oldState);
+
+  if (newState < oldState)
+    HandlePowerWakup(newState, oldState);
+  else
+    HandlePowerGoSleep(newState, oldState);
+}
+
+void Tonuino::HandlePowerWakup(PowerState newState, PowerState oldState)
+{
+  if (oldState == PowerState::VeryDeepSleep)
+  {
+    // wakup mp3
+  }
+
+  if (newState == PowerState::Active)
+  {
+    sleepStateTimer.start(awakeTime);
+  }
+  if (newState == PowerState::Mp3Awake)
+  {
+    sleepStateTimer.start(awakeTime);
+  }
+}
+
+void ChangeWatchDog(uint8_t time)
+{
+  //watchdog initialisieren
+
+}
+
+void Tonuino::HandlePowerGoSleep(PowerState newState, PowerState oldState)
+{
+  if (newState == PowerState::VeryDeepSleep)
+  {
+    ChangeWatchDog(deepSleepCycleTime);
+    // shutdown mp3
+  }
+  if (newState == PowerState::LightSleep)
+  {
+    sleepStateTimer.start(lightSleepTime);
+    ChangeWatchDog(sleepCycleTime);
+  }
+  if (newState == PowerState::DeepSleep)
+  {
+    sleepStateTimer.start(deepSleepTime);
+    ChangeWatchDog(sleepCycleTime);
+  }
+}
+
+void Tonuino::logPowerStateChange(PowerState newState, PowerState oldState)
+{
+  LOG(powerstate_log, s_debug, getPowerStateName(oldState), F(" -> "), getPowerStateName(newState));
+  if (powerstate_log::will_log(s_debug))
+    delay(50);
+}
+
+const __FlashStringHelper *Tonuino::getPowerStateName(PowerState state)
+{
+  switch (state)
+  {
+  case PowerState::Active:
+    return F("Active");
+  case PowerState::LightSleep:
+    return F("LightSleep");
+  case PowerState::Mp3Awake:
+    return F("Mp3Awake");
+  case PowerState::DeepSleep:
+    return F("DeepSleep");
+  case PowerState::VeryDeepSleep:
+    return F("VeryDeepSleep");
+  }
+  return F("unknown");
 }
 
 unsigned long Tonuino::getWatchDogMillis()
 {
-  if( powerState == PowerState::DeepSleep )
+  if (powerState == PowerState::DeepSleep || powerState == PowerState::VeryDeepSleep)
     return getWatchDogMillis(deepSleepCycleTime);
 
   return getWatchDogMillis(sleepCycleTime);

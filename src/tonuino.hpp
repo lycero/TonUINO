@@ -21,7 +21,9 @@ enum class WakeupSource{
 enum class PowerState{
   Active,
   LightSleep,
-  DeepSleep
+  Mp3Awake,
+  DeepSleep,
+  VeryDeepSleep
 };
 
 class Tonuino {
@@ -53,6 +55,11 @@ public:
 private:
 
   void ChangePowerState(WakeupSource source);
+  void HandlePowerStateChange(PowerState newState, PowerState oldState);
+  void HandlePowerWakup(PowerState newState, PowerState oldState);
+  void HandlePowerGoSleep(PowerState newState, PowerState oldState);
+  void logPowerStateChange(PowerState newState, PowerState oldState);
+  const __FlashStringHelper* getPowerStateName(PowerState state);
   bool specialCard(const nfcTagObject &nfcTag);
   void checkNfc();
   void checkInputs();

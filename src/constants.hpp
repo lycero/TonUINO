@@ -49,7 +49,7 @@ inline constexpr uint8_t       maxTracksInFolder        = 255;
 inline constexpr uint8_t       dfPlayer_receivePin      = 51;
 inline constexpr uint8_t       dfPlayer_transmitPin     = 50;
 inline constexpr uint8_t       dfPlayer_busyPin         = 63;
-inline constexpr levelType     dfPlayer_busyPinType     = levelType::activeHigh;
+inline constexpr levelType     dfPlayer_busyPinType     = levelType::activeLow;
 inline constexpr unsigned long dfPlayer_timeUntilStarts = 2000;
 
 
@@ -58,8 +58,9 @@ inline constexpr unsigned long dfPlayer_timeUntilStarts = 2000;
 inline constexpr uint8_t   openAnalogPin        = A7;
 inline constexpr unsigned long cycleTime        = 50;
 inline constexpr uint8_t sleepCycleTime   = WDTO_2S;
-inline constexpr uint8_t deepSleepCycleTime   = WDTO_8S;
-inline constexpr unsigned long awakeTime        = 3000;
-inline constexpr unsigned long lightSleepTime   = 1000;
+inline constexpr uint8_t deepSleepCycleTime   = WDTO_4S;
+inline constexpr unsigned long awakeTime        = 4000;
+inline constexpr unsigned long lightSleepTime   = 8000;
+inline constexpr unsigned long deepSleepTime    = 16000;
 
 #endif /* SRC_CONSTANTS_HPP_ */
