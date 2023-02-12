@@ -47,6 +47,8 @@ public:
   const nfcTagObject& getCard() const           { return myCard; }
   void setFolder(folderSettings *newFolder    ) { myFolder = newFolder; }
 
+  void keepAwake() { myKeepAwake = true; };
+
   Mp3&      getMp3      () { return mp3      ; }
   Commands& getCommands () { return commands ; }
   Settings& getSettings () { return settings ; }
@@ -66,6 +68,7 @@ private:
   void loopMp3();
   void UpdatePowerState(unsigned long startCycle);
   void executeSleep();
+  bool isKeepAwake();
   unsigned long getWatchDogMillis();
   unsigned long getWatchDogMillis(uint8_t time);
 
@@ -91,11 +94,13 @@ private:
   Modifier*            activeModifier      {&noneModifier};
 
   Timer                sleepStateTimer     {};
+  Timer                cardSleepTimer      {};
 
   nfcTagObject         myCard              {};
   folderSettings*      myFolder            {&myCard.nfcFolderSettings};
   uint16_t             numTracksInFolder   {};
   PowerState           powerState          {PowerState::Active};
+  volatile boolean     myKeepAwake         {false};
 };
 
 #endif /* SRC_TONUINO_HPP_ */

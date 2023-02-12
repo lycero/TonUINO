@@ -187,6 +187,17 @@ void Mp3::playPrevious() {
   }
 }
 
+void Mp3::updateTimer(unsigned long time)
+{
+    startTrackTimer.updateMillis(time);
+    missingOnPlayFinishedTimer.updateMillis(time);
+}
+
+void Mp3::flushSerial()
+{
+    softwareSerial.flush();
+}
+
 void Mp3::increaseVolume() {
   if (volume < settings.maxVolume) {
     Base::setVolume(++volume);

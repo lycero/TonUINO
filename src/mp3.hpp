@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <DFMiniMp3.h>
-#include <SoftwareSerialLight.h>
+#include "SoftwareSerialLight/SoftwareSerialLight.h"
 
 #include "settings.hpp"
 #include "queue.hpp"
@@ -155,6 +155,8 @@ public:
   void playCurrent();
   void playNext();
   void playPrevious();
+  void updateTimer(unsigned long time);
+  void flushSerial();
   uint8_t getCurrentTrack() { return playing ? q.get(current_track) : 0; }
 
 #ifdef CHECK_MISSING_ONPLAYFINISHED

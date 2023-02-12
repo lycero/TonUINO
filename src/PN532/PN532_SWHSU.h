@@ -2,7 +2,7 @@
 #ifndef __PN532_SWHSU_H__
 #define __PN532_SWHSU_H__
 
-#include <SoftwareSerialLight.h>
+#include "../SoftwareSerialLight/SoftwareSerialLight.h"
 
 #include "PN532Interface.h"
 #include "Arduino.h"

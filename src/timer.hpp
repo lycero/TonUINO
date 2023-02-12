@@ -4,11 +4,13 @@
 class Timer {
 public:
   void start(unsigned long timeout);
+  void updateMillis(unsigned long timeout);
   bool isExpired();
   void stop();
   bool isActive() { return active; }
 private:
   unsigned long expireTime{0    };
+  unsigned long epiredTime{0    };
   bool          active    {false};
 };
 

@@ -7,13 +7,19 @@
 
 void Timer::start(unsigned long timeout) {
   expireTime = millis() + timeout;
-  LOG(powerstate_log, s_debug, F("Timer::start: "), millis(), F(" -> "), expireTime);
+  epiredTime = 0;
+  //LOG(powerstate_log, s_debug, F("Timer::start: "), millis(), F(" -> "), expireTime);
   active = true;
 }
+void Timer::updateMillis(unsigned long time)
+{
+    epiredTime += time;
+}
+
 bool Timer::isExpired() {
   if (not active)
     return true;
-  if (expireTime <= millis()) {
+  if (expireTime <= (epiredTime + millis())) {
     active = false;
     return true;
   }

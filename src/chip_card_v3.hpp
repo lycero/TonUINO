@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-#include <PN532.h>
-#include <PN532_HSU.h>
+#include "PN532/PN532.h"
+#include "PN532/PN532_HSU.h"
 
 #include "constants.hpp"
 
