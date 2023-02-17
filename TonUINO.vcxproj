@@ -77,6 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\buttons.cpp" />
+    <ClCompile Include="src\ChangeCounter.cpp" />
     <ClCompile Include="src\chip_card_v3.cpp" />
     <ClCompile Include="src\commands.cpp" />
     <ClCompile Include="src\log.cpp" />
@@ -96,6 +97,7 @@
   <ItemGroup>
     <ClInclude Include="src\array.hpp" />
     <ClInclude Include="src\buttons.hpp" />
+    <ClInclude Include="src\ChangeCounter.h" />
     <ClInclude Include="src\chip_card_v3.hpp" />
     <ClInclude Include="src\commands.hpp" />
     <ClInclude Include="src\constants.hpp" />

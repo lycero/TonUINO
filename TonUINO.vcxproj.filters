@@ -63,6 +63,9 @@
     <ClCompile Include="src\SoftwareSerialLight\SoftwareSerialLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ChangeCounter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\modifier.hpp">
@@ -141,6 +144,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="__vm\.TonUINO.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ChangeCounter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

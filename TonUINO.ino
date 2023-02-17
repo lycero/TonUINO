@@ -1,11 +1,11 @@
 #include "src/tonuino.hpp"
 
 #include "src/settings.hpp"
-#include "src/mp3.hpp"
+//#include "src/mp3.hpp"
 #include "src/buttons.hpp"
 #include "src/logger.hpp"
 #include "src/constants.hpp"
-#include "src/PinChangeInterruptHandler/PinChangeInterruptHandler.h"
+#include "src/ChangeCounter.h"
 
 /*
    _____         _____ _____ _____ _____
@@ -19,63 +19,17 @@
     Information and contribution at https://tonuino.de.
 */
 
-// Inherit from PinChangeInterruptHandler
-class ChangeCounter 
-: PinChangeInterruptHandler 
-{
-  byte inputPin;
-  byte inputMode;
-  unsigned long riseCounter;
-  unsigned long fallCounter;
-
-public:
-  ChangeCounter(byte pin, byte mode) : riseCounter(0), fallCounter(0), inputPin(pin), inputMode(mode) {}
-  
-  void begin() {
-    pinMode(inputPin, inputMode);
-    riseCounter = 0;
-    fallCounter = 0;    
-    attachPCInterrupt(digitalPinToPCINT(inputPin));
-  }
-
-  void stop() {
-    detachPCInterrupt(digitalPinToPCINT(inputPin));
-  }
-
-  bool getRise() {
-    bool res = riseCounter > 0;
-    riseCounter = 0;
-    return res;
-  }
-
-  bool getFall() {
-    bool res = fallCounter > 0;
-    fallCounter = 0;
-    return res;
-  }
-
-  // Overwrite handlePCInterrupt() method
-  virtual void handlePCInterrupt(int8_t interruptNum, bool value) {
-    if (digitalPinToPCINT(inputPin) != interruptNum)
-      return;
-
-    if (value)
-      ++riseCounter;
-    else
-      ++fallCounter;
-    Tonuino::getTonuino().keepAwake();
-  }
-};
-
-ChangeCounter counter(buttonPausePin, INPUT);
-ChangeCounter counter2(dfPlayer_busyPin, INPUT);
-
 volatile bool watchDogToggle = true;
 // Watchdog timer Interrupt Service Routine
 ISR(WDT_vect)
 {
     watchDogToggle = true;
 }
+
+ChangeCounter pauseCounter(buttonPausePin);
+ChangeCounter nextCounter(buttonUpPin);
+ChangeCounter prevCounter(buttonDownPin);
+ChangeCounter mp3BusyCounter(dfPlayer_busyPin);
 
 void setup() {
 
@@ -100,8 +54,10 @@ void setup() {
   LOG(init_log, s_debug, F("Information and contribution at https://tonuino.de.\n"));
 
   delay(50);
-  counter.begin();
-  counter2.begin();
+  pauseCounter.begin();
+  prevCounter.begin();
+  nextCounter.begin();
+  mp3BusyCounter.begin();
   Tonuino::getTonuino().setup();
  }
 
@@ -112,11 +68,11 @@ void loop()
     watchDogToggle = false;
     Tonuino::getTonuino().loop(WakeupSource::Watchdog);
   }
-  else if(counter2.getRise())
+  else if(mp3BusyCounter.getRise())
   {
     Tonuino::getTonuino().loop(WakeupSource::Mp3BusyChange);
   }  
-  else if(counter.getRise())
+  else if(pauseCounter.getRise() || prevCounter.getRise() || nextCounter.getRise())
   {
     Tonuino::getTonuino().loop(WakeupSource::KeyInput);
   }
