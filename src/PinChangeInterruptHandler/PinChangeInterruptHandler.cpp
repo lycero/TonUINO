@@ -187,17 +187,17 @@ static void changeInterrupt(byte port, byte state) {
   }
 }
 
-// #if defined(PCINT0_vect)
-//   ISR(PCINT0_vect) { changeInterrupt(0, PCINT_INPUT_PORT0); }
-// #endif
-#if defined(PCINT1_vect)
-  ISR(PCINT1_vect) { changeInterrupt(1, PCINT_INPUT_PORT1); }
-#endif
-#if defined(PCINT2_vect)
-  ISR(PCINT2_vect) { changeInterrupt(2, PCINT_INPUT_PORT2); }
-#endif
-#if defined(PCINT3_vect)
-  ISR(PCINT3_vect) { changeInterrupt(3, PCINT_INPUT_PORT3); }
-#endif
+ #if defined(PCINT0_vect)
+   ISR(PCINT0_vect) { changeInterrupt(0, PCINT_INPUT_PORT0); }
+ #endif
+//#if defined(PCINT1_vect)
+//  ISR(PCINT1_vect) { changeInterrupt(1, PCINT_INPUT_PORT1); }
+//#endif
+//#if defined(PCINT2_vect)
+//  ISR(PCINT2_vect) { changeInterrupt(2, PCINT_INPUT_PORT2); }
+//#endif
+//#if defined(PCINT3_vect)
+//  ISR(PCINT3_vect) { changeInterrupt(3, PCINT_INPUT_PORT3); }
+//#endif
 
 #endif

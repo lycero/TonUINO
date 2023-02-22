@@ -50,3 +50,5 @@ Temporary Items
 .vs
 __vm
 /obj
+/readme
+/Debug

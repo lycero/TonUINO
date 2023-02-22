@@ -1,7 +1,6 @@
 #include "tonuino.hpp"
 
 #include <Arduino.h>
-#include <avr/sleep.h>
 
 #include "array.hpp"
 #include "chip_card_v3.hpp"
@@ -38,22 +37,26 @@ namespace
 
 void Tonuino::setup()
 {
-	pinMode(dfPlayer_ampPin, OUTPUT);
-	digitalWrite(dfPlayer_ampPin, 0);
+	SetupWatchDog(sleepCycleTime);
+
+	//pinMode(dfPlayer_ampPin, OUTPUT);
+	//digitalWrite(dfPlayer_ampPin, 0);
 	// load Settings from EEPROM
 	settings.loadSettingsFromFlash();
 
-	delay(50);
+	// NFC Leser initialisieren
+	delay(25);
+	//chip_card.initCard();
+
+	digitalWrite(dfPlayer_powerPin, 1);
+	delay(25);
 	// DFPlayer Mini initialisieren
 	mp3.begin();
 	// // Zwei Sekunden warten bis der DFPlayer Mini initialisiert ist
-	delay(3000);
+	delay(1500);
+	digitalWrite(dfPlayer_ampPin, 0);
 	mp3.setVolume();
 	mp3.setEq(static_cast<DfMp3_Eq>(settings.eq - 1));
-
-	// NFC Leser initialisieren
-	delay(50);
-	chip_card.initCard();
 
 	// RESET --- ALLE DREI KNÖPFE BEIM STARTEN GEDRÜCKT HALTEN -> alle EINSTELLUNGEN werden gelöscht
 	if (buttons.isReset())
@@ -69,7 +72,17 @@ void Tonuino::setup()
 	sleepStateTimer.start(awakeTime);
 	cardSleepTimer.start(cardSleep);
 
-	SetupWatchDog(sleepCycleTime);
+	delay(200);
+	mp3.enqueueTrack(6,2);
+	mp3.enqueueTrack(6,1);
+	mp3.enqueueTrack(6,2);
+	mp3.enqueueTrack(6,1);
+	mp3.enqueueTrack(6, 2);
+	mp3.enqueueTrack(6, 1);
+	mp3.enqueueTrack(6,3);
+	mp3.enqueueTrack(6, 2);
+	mp3.enqueueTrack(6, 1);
+	mp3.playCurrent();
 }
 
 void Tonuino::loop(WakeupSource source)
@@ -82,7 +95,7 @@ void Tonuino::loop(WakeupSource source)
 
 	checkInputs();
 
-	checkNfc();
+	//checkNfc();
 
 	UpdatePowerState(start_cycle);
 }
@@ -193,6 +206,17 @@ void Tonuino::previousTrack()
 		settings.writeFolderSettingToFlash(myFolder->folder, trackToSave);
 	}
 	mp3.playPrevious();
+}
+
+void Tonuino::keepAwake() 
+{
+	wdt_reset();
+	myKeepAwake++;
+}
+
+void Tonuino::OnPlayFinished(uint16_t track)
+{
+	mp3.OnPlayFinished(track);
 }
 
 bool Tonuino::specialCard(const nfcTagObject& nfcTag)
@@ -314,13 +338,35 @@ void Tonuino::ChangePowerState(WakeupSource source)
 	}
 	case WakeupSource::Mp3BusyChange:
 	{
+		wdt_reset();
+		myKeepAwake++;
+
+		if (powerState == PowerState::VeryDeepSleep)
+		{
+			HandlePowerStateChange(PowerState::DeepSleep, PowerState::VeryDeepSleep);
+			sleepStateTimer.start(deepSleepTime);
+		}
+
+		//if (powerState != PowerState::Active && powerState != PowerState::Mp3Awake) 
+		if(true)
+		{
+			if ((mp3.isPlayingFolder() || mp3.isPlayingMp3()) && !mp3.isPlaying()) 
+			{
+				if (powerState != PowerState::Active && powerState != PowerState::Mp3Awake)
+					sleepStateTimer.start(deepSleepTime);
+
+				mp3.OnPlayFinished(mp3.getLastPlayedTrack());
+			}
+		}
+
 		if (powerState == PowerState::DeepSleep || powerState == PowerState::VeryDeepSleep)
 		{
-			HandlePowerStateChange(PowerState::Mp3Awake, powerState);
+			sleepStateTimer.start(deepSleepTime);
+			//HandlePowerStateChange(PowerState::Mp3Awake, powerState);
 		}
 		if (powerState == PowerState::Active || powerState == PowerState::LightSleep)
 		{
-			HandlePowerStateChange(PowerState::Active, powerState);
+			//HandlePowerStateChange(PowerState::Active, powerState);
 		}
 		break;
 	}
@@ -418,6 +464,11 @@ void Tonuino::HandlePowerWakup(PowerState newState, PowerState oldState)
 	if (oldState == PowerState::VeryDeepSleep)
 	{
 		// wakup mp3
+		if (!mp3.isPausing()) 
+		{
+			mp3.wakeup();
+			delay(10);
+		}
 		digitalWrite(dfPlayer_ampPin, 0);
 	}
 
@@ -438,6 +489,8 @@ void Tonuino::HandlePowerGoSleep(PowerState newState, PowerState oldState)
 		digitalWrite(dfPlayer_ampPin, 1);
 		ChangeWatchDog(deepSleepCycleTime);
 		// shutdown mp3
+		if (!mp3.isPausing())
+			mp3.goSleep();
 	}
 	if (newState == PowerState::LightSleep)
 	{
@@ -480,7 +533,7 @@ bool Tonuino::isKeepAwake()
 {
 	if (myKeepAwake) 
 	{
-		myKeepAwake = false;
+		myKeepAwake--;
 		return true;
 	}
 	return false;
@@ -520,15 +573,20 @@ unsigned long Tonuino::getWatchDogMillis(uint8_t time)
 void Tonuino::executeSleep()
 {
 	wdt_reset();
+	mp3.SerialStopListening();
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+	cli();
 	sleep_enable();
 	power_adc_disable();
+	power_usart0_disable();
 	power_spi_disable();
 	power_timer0_disable();
+	power_timer1_disable();
 	power_timer2_disable();
 	power_twi_disable();
-	interrupts();
+	sei();
 	sleep_cpu();
 	sleep_disable();
 	power_all_enable();
+	mp3.SerialStartListening();
 }

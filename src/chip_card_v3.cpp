@@ -58,7 +58,7 @@ const byte trailerBlock = 7;
 
 Chip_card::Chip_card(Mp3 &mp3)
 : mp3(mp3)
-, pn532hsu(Serial3)
+, pn532hsu(Serial)
 , pn532(pn532hsu)
 , cardRemovedSwitch(cardRemoveDelay)
 {
@@ -142,6 +142,7 @@ void Chip_card::initCard()
   if (!versiondata)
   {
     LOG(card_log, s_debug, F("Didn't Find PN53x Module"));
+    digitalWrite(resetPin, LOW);
     return;
   }
 

@@ -24,9 +24,10 @@ inline constexpr int getLevel(levelType t, level l) { return (l == level::inacti
 //#define FIVEBUTTONS
 
 inline constexpr uint32_t buttonLongPress      = 1000; // timeout for long press button in ms
-inline constexpr uint8_t  buttonPausePin       = 62;
-inline constexpr uint8_t  buttonUpPin          = A1;
-inline constexpr uint8_t  buttonDownPin        = A2;
+inline constexpr uint8_t  buttonPausePin       = 10;
+inline constexpr uint8_t  buttonUpPin          = 11;
+inline constexpr uint8_t  buttonDownPin        = 12;
+inline constexpr uint8_t  resetPin             = 6;
 
 #ifdef FIVEBUTTONS
 inline constexpr uint8_t  buttonFourPin        = A3;
@@ -46,10 +47,11 @@ inline constexpr unsigned long cardSleep       = 1000;
 // ####### mp3 #########################################
 
 inline constexpr uint8_t       maxTracksInFolder        = 255;
-inline constexpr uint8_t       dfPlayer_receivePin      = 51;
-inline constexpr uint8_t       dfPlayer_transmitPin     = 50;
-inline constexpr uint8_t       dfPlayer_busyPin         = 63;
-inline constexpr uint8_t       dfPlayer_ampPin          = 45;
+inline constexpr uint8_t       dfPlayer_receivePin      = A1;
+inline constexpr uint8_t       dfPlayer_transmitPin     = A0;
+inline constexpr uint8_t       dfPlayer_busyPin         = 9;
+inline constexpr uint8_t       dfPlayer_ampPin          = 4;
+inline constexpr uint8_t       dfPlayer_powerPin        = 5;
 inline constexpr levelType     dfPlayer_busyPinType     = levelType::activeLow;
 inline constexpr unsigned long dfPlayer_timeUntilStarts = 3000;
 
@@ -60,8 +62,8 @@ inline constexpr uint8_t   openAnalogPin        = A7;
 inline constexpr unsigned long cycleTime        = 50;
 inline constexpr uint8_t sleepCycleTime   = WDTO_2S;
 inline constexpr uint8_t deepSleepCycleTime   = WDTO_2S;
-inline constexpr unsigned long awakeTime        = 10000;
-inline constexpr unsigned long lightSleepTime   = 15000;
-inline constexpr unsigned long deepSleepTime    = 30000;
+inline constexpr unsigned long awakeTime        = 25000;
+inline constexpr unsigned long lightSleepTime   = 50;
+inline constexpr unsigned long deepSleepTime    = 10000;
 
 #endif /* SRC_CONSTANTS_HPP_ */

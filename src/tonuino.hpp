@@ -8,6 +8,7 @@
 #include "mp3.hpp"
 #include "chip_card_v3.hpp"
 #include "modifier.hpp"
+#include "loopModifier.h"
 #include "timer.hpp"
 
 enum class WakeupSource{
@@ -47,7 +48,9 @@ public:
   const nfcTagObject& getCard() const           { return myCard; }
   void setFolder(folderSettings *newFolder    ) { myFolder = newFolder; }
 
-  void keepAwake() { myKeepAwake = true; };
+  void keepAwake();
+  void executeSleep();
+  void OnPlayFinished(uint16_t track);
 
   Mp3&      getMp3      () { return mp3      ; }
   Commands& getCommands () { return commands ; }
@@ -67,7 +70,6 @@ private:
   void checkInputs();
   void loopMp3();
   void UpdatePowerState(unsigned long startCycle);
-  void executeSleep();
   bool isKeepAwake();
   unsigned long getWatchDogMillis();
   unsigned long getWatchDogMillis(uint8_t time);
@@ -92,6 +94,7 @@ private:
   //FeedbackModifier     feedbackModifier    {*this, mp3, settings};
 
   Modifier*            activeModifier      {&noneModifier};
+  LoopModifier::LoopModifier* activeLoopModifier{};
 
   Timer                sleepStateTimer     {};
   Timer                cardSleepTimer      {};
@@ -100,7 +103,7 @@ private:
   folderSettings*      myFolder            {&myCard.nfcFolderSettings};
   uint16_t             numTracksInFolder   {};
   PowerState           powerState          {PowerState::Active};
-  volatile boolean     myKeepAwake         {false};
+  volatile uint8_t     myKeepAwake         {0};
 };
 
 #endif /* SRC_TONUINO_HPP_ */

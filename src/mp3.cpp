@@ -9,29 +9,21 @@ const __FlashStringHelper* str_Volume() { return F("Volume: ") ; }
 
 }
 
-uint16_t Mp3Notify::lastTrackFinished = 0;
-
-void Mp3Notify::OnError(uint16_t errorCode) {
+void Mp3Notify::OnError(DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, uint16_t errorCode) {
   // see DfMp3_Error for code meaning
   LOG(mp3_log, s_error, F("DfPlayer Error: "), errorCode);
 }
-void Mp3Notify::OnPlaySourceOnline  (DfMp3_PlaySources source) { PrintlnSourceAction(source, F("online"  )); }
-void Mp3Notify::OnPlaySourceInserted(DfMp3_PlaySources source) { PrintlnSourceAction(source, F("bereit"  )); }
-void Mp3Notify::OnPlaySourceRemoved (DfMp3_PlaySources source) { PrintlnSourceAction(source, F("entfernt")); }
+void Mp3Notify::OnPlaySourceOnline  (DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source) { PrintlnSourceAction(source, F("online"  )); }
+void Mp3Notify::OnPlaySourceInserted(DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source) { PrintlnSourceAction(source, F("bereit"  )); }
+void Mp3Notify::OnPlaySourceRemoved (DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source) { PrintlnSourceAction(source, F("entfernt")); }
 void Mp3Notify::PrintlnSourceAction(DfMp3_PlaySources source, const __FlashStringHelper* action) {
   if (source & DfMp3_PlaySources_Sd   ) LOG(mp3_log, s_debug, F("SD Karte "), action);
   if (source & DfMp3_PlaySources_Usb  ) LOG(mp3_log, s_debug, F("USB "     ), action);
   if (source & DfMp3_PlaySources_Flash) LOG(mp3_log, s_debug, F("Flash "   ), action);
 }
 
-void Mp3Notify::OnPlayFinished(DfMp3_PlaySources /*source*/, uint16_t track) {
-  LOG(mp3_log, s_debug, F("Track beendet: "), track);
-  if (track == lastTrackFinished)
-    return;
-  else
-    lastTrackFinished = track;
-  delay(1);
-  Tonuino::getTonuino().nextTrack(true/*fromOnPlayFinished*/);
+void Mp3Notify::OnPlayFinished(DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources /*source*/, uint16_t track) {
+  Tonuino::getTonuino().OnPlayFinished(track);
 }
 
 Mp3::Mp3(const Settings& settings)
@@ -45,6 +37,10 @@ Mp3::Mp3(const Settings& settings)
 
 bool Mp3::isPlaying() const {
   return !digitalRead(dfPlayer_busyPin);
+}
+
+bool Mp3::isPausing() const{
+    return isPause;
 }
 
 void Mp3::waitForTrackToFinish() {
@@ -99,7 +95,7 @@ void Mp3::clearMp3Queue() {
   mp3_track_next = 0;
 }
 void Mp3::enqueueTrack(uint8_t folder, uint8_t firstTrack, uint8_t lastTrack, uint8_t currentTrack) {
-  clearAllQueue();
+  //clearAllQueue();
   current_folder = folder;
   for (uint8_t i = firstTrack; i<=lastTrack; ++i) {
     LOG(mp3_log, s_info, F("enqueue "), folder, F("-"), i);
@@ -134,7 +130,7 @@ void Mp3::playCurrent() {
   if (current_folder == 0) { // maybe play mp3 track
     if (mp3_track != 0) {
       LOG(mp3_log, s_info, F("play mp3 "), mp3_track);
-      Mp3Notify::ResetLastTrackFinished(); // maybe the same mp3 track is played twice
+      ResetLastTrackFinished(); // maybe the same mp3 track is played twice
       Base::playMp3FolderTrack(mp3_track);
 #ifdef CHECK_MISSING_ONPLAYFINISHED
       isPause = false;
@@ -142,13 +138,14 @@ void Mp3::playCurrent() {
 #endif
       playing = play_mp3;
       mp3_track = 0;
-      swap(mp3_track, mp3_track_next);
+      swap(mp3_track, mp3_track_next);      
     }
   }
   else { // play folder track
     uint8_t t = q.get(current_track);
     if (t != 0) {
       LOG(mp3_log, s_info, F("play "), current_folder, F("-"), t);
+      mp3_track_last = t;
       Base::playFolderTrack(current_folder, t);
 #ifdef CHECK_MISSING_ONPLAYFINISHED
       isPause = false;
@@ -198,6 +195,39 @@ void Mp3::flushSerial()
     softwareSerial.flush();
 }
 
+uint8_t Mp3::getCurrentTrackFromPlayer() 
+{ 
+    softwareSerial.clearWriteError();
+    return Base::getCurrentTrack();
+}
+
+void Mp3::OnPlayFinished(uint16_t track)
+{
+    LOG(mp3_log, s_debug, F("Track beendet: "), track);
+    if (track == lastTrackFinished)
+        return;
+    
+    lastTrackFinished = track;
+    Tonuino::getTonuino().keepAwake();
+    delay(1);
+    Tonuino::getTonuino().nextTrack(true/*fromOnPlayFinished*/);
+}
+
+uint16_t Mp3::GetStatus()
+{
+   Base::getStatus();
+}
+
+void Mp3::SerialStopListening()
+{
+    softwareSerial.stopListening();
+}
+
+void Mp3::SerialStartListening()
+{
+    softwareSerial.listen();
+}
+
 void Mp3::increaseVolume() {
   if (volume < settings.maxVolume) {
     Base::setVolume(++volume);
@@ -236,4 +266,14 @@ void Mp3::loop() {
     playCurrent();
   }
   Base::loop();
+}
+
+void Mp3::goSleep()
+{
+    Base::sleep();
+}
+
+void Mp3::wakeup()
+{
+    Base::reset();
 }

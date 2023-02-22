@@ -71,7 +71,7 @@ bool RepeatSingleModifier::handleNext() {
   LOG(modifier_log, s_info, str_RepeatSingleModifier(), F(" -> REPEAT"));
   mp3.loop(); // WA: this will call again Mp3Notify::OnPlayFinished() (error in DFMiniMp3 lib)
               //     but will be blocked by lastTrackFinished
-  Mp3Notify::ResetLastTrackFinished(); // unblock this track so that it can be repeated
+  mp3.ResetLastTrackFinished(); // unblock this track so that it can be repeated
   mp3.playCurrent();
   return true;
 }

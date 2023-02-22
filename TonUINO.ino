@@ -10,20 +10,20 @@
 /*
    _____         _____ _____ _____ _____
   |_   _|___ ___|  |  |     |   | |     |
-    | | | . |   |  |  |-   -| | | |  |  |
-    |_| |___|_|_|_____|_____|_|___|_____|
-    TonUINO Version 3.0
+	| | | . |   |  |  |-   -| | | |  |  |
+	|_| |___|_|_|_____|_____|_|___|_____|
+	TonUINO Version 3.0
 
-    created by Thorsten Voß and licensed under GNU/GPL.
-    refactored by Boerge1
-    Information and contribution at https://tonuino.de.
+	created by Thorsten Voß and licensed under GNU/GPL.
+	refactored by Boerge1
+	Information and contribution at https://tonuino.de.
 */
 
 volatile bool watchDogToggle = true;
 // Watchdog timer Interrupt Service Routine
 ISR(WDT_vect)
 {
-    watchDogToggle = true;
+	watchDogToggle = true;
 }
 
 ChangeCounter pauseCounter(buttonPausePin);
@@ -31,53 +31,73 @@ ChangeCounter nextCounter(buttonUpPin);
 ChangeCounter prevCounter(buttonDownPin);
 ChangeCounter mp3BusyCounter(dfPlayer_busyPin);
 
-void setup() {
-
-  Serial.begin(115200); // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
-  // Wert für randomSeed() erzeugen durch das mehrfache Sammeln von rauschenden LSBs eines offenen Analogeingangs
-  uint32_t ADC_LSB = 0;
-  uint32_t ADCSeed = 0;
-  for (uint8_t i = 0; i < 128; i++) {
-    ADC_LSB = analogRead(openAnalogPin) & 0x1;
-    ADCSeed ^= ADC_LSB << (i % 32);
-  }
-  randomSeed(ADCSeed); // Zufallsgenerator initialisieren
-
-  // // Dieser Hinweis darf nicht entfernt werden
-  LOG(init_log, s_debug, F(" _____         _____ _____ _____ _____"));
-  LOG(init_log, s_debug, F("|_   _|___ ___|  |  |     |   | |     |"));
-  LOG(init_log, s_debug, F("  | | | . |   |  |  |-   -| | | |  |  |"));
-  LOG(init_log, s_debug, F("  |_| |___|_|_|_____|_____|_|___|_____|\n"));
-  LOG(init_log, s_info , F("TonUINO Version 3.0"));
-  LOG(init_log, s_info , F("created by Thorsten Voß and licensed under GNU/GPL."));
-  LOG(init_log, s_info , F("refactored by Boerge1."));
-  LOG(init_log, s_debug, F("Information and contribution at https://tonuino.de.\n"));
-
-  delay(50);
-  pauseCounter.begin();
-  prevCounter.begin();
-  nextCounter.begin();
-  mp3BusyCounter.begin();
-  Tonuino::getTonuino().setup();
- }
-
-void loop() 
+void setup()
 {
-  if(watchDogToggle)
-  {
-    watchDogToggle = false;
-    Tonuino::getTonuino().loop(WakeupSource::Watchdog);
-  }
-  else if(mp3BusyCounter.getRise())
-  {
-    Tonuino::getTonuino().loop(WakeupSource::Mp3BusyChange);
-  }  
-  else if(pauseCounter.getRise() || prevCounter.getRise() || nextCounter.getRise())
-  {
-    Tonuino::getTonuino().loop(WakeupSource::KeyInput);
-  }
-  else
-  {
-    Tonuino::getTonuino().loop(WakeupSource::None);
-  }
+	digitalWrite(resetPin, HIGH);
+  pinMode(resetPin, OUTPUT);
+
+  pinMode(dfPlayer_powerPin, OUTPUT);
+	digitalWrite(dfPlayer_powerPin, 0);
+
+	//setup pinModes
+	digitalWrite(dfPlayer_transmitPin, 1);
+	pinMode(dfPlayer_transmitPin, OUTPUT);
+
+	digitalWrite(dfPlayer_ampPin, 1);
+	pinMode(dfPlayer_ampPin, OUTPUT);
+
+	pinMode(dfPlayer_receivePin, INPUT);
+	digitalWrite(dfPlayer_receivePin, 1);
+
+	pinMode(dfPlayer_busyPin, INPUT_PULLUP);
+
+	cli();
+	pauseCounter.begin();
+	prevCounter.begin();
+	nextCounter.begin();
+	mp3BusyCounter.begin();
+	sei();
+
+	Serial.begin(115200); // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
+	// Wert für randomSeed() erzeugen durch das mehrfache Sammeln von rauschenden LSBs eines offenen Analogeingangs
+	uint32_t ADC_LSB = 0;
+	uint32_t ADCSeed = 0;
+	for (uint8_t i = 0; i < 128; i++) {
+		ADC_LSB = analogRead(openAnalogPin) & 0x1;
+		ADCSeed ^= ADC_LSB << (i % 32);
+	}
+	randomSeed(ADCSeed); // Zufallsgenerator initialisieren
+delay(499);
+	// // Dieser Hinweis darf nicht entfernt werden
+	LOG(init_log, s_debug, F(" _____         _____ _____ _____ _____"));
+	LOG(init_log, s_debug, F("|_   _|___ ___|  |  |     |   | |     |"));
+	LOG(init_log, s_debug, F("  | | | . |   |  |  |-   -| | | |  |  |"));
+	LOG(init_log, s_debug, F("  |_| |___|_|_|_____|_____|_|___|_____|\n"));
+	LOG(init_log, s_info, F("TonUINO Version 3.0"));
+	LOG(init_log, s_info, F("created by Thorsten Voß and licensed under GNU/GPL."));
+	LOG(init_log, s_info, F("refactored by Boerge1."));
+	LOG(init_log, s_debug, F("Information and contribution at https://tonuino.de.\n"));
+
+	Tonuino::getTonuino().setup();
+}
+
+void loop()
+{
+	if (watchDogToggle)
+	{
+		watchDogToggle = false;
+		Tonuino::getTonuino().loop(WakeupSource::Watchdog);
+	}
+	else if (mp3BusyCounter.getRise())
+	{
+		Tonuino::getTonuino().loop(WakeupSource::Mp3BusyChange);
+	}
+	else if (pauseCounter.getRise() || prevCounter.getRise() || nextCounter.getRise())
+	{
+		Tonuino::getTonuino().loop(WakeupSource::KeyInput);
+	}
+	else
+	{
+		Tonuino::getTonuino().loop(WakeupSource::None);
+	}
 }

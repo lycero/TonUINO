@@ -117,16 +117,13 @@ enum class advertTracks: uint16_t {
 //
 class Mp3Notify {
 public:
-  static void OnError             (uint16_t errorCode);
-  static void OnPlayFinished      (DfMp3_PlaySources source, uint16_t track);
-  static void OnPlaySourceOnline  (DfMp3_PlaySources source);
-  static void OnPlaySourceInserted(DfMp3_PlaySources source);
-  static void OnPlaySourceRemoved (DfMp3_PlaySources source);
-
-  static void ResetLastTrackFinished() { lastTrackFinished = 0; }
+  static void OnError             (DFMiniMp3<SoftwareSerial, Mp3Notify>&sender, uint16_t errorCode);
+  static void OnPlayFinished      (DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source, uint16_t track);
+  static void OnPlaySourceOnline  (DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source);
+  static void OnPlaySourceInserted(DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source);
+  static void OnPlaySourceRemoved (DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source);
 private:
-  static void PrintlnSourceAction (DfMp3_PlaySources source, const __FlashStringHelper* action);
-  static uint16_t lastTrackFinished;
+  static void PrintlnSourceAction (DfMp3_PlaySources source, const __FlashStringHelper* action);  
 };
 
 class Mp3: public DFMiniMp3<SoftwareSerial, Mp3Notify> {
@@ -135,6 +132,7 @@ public:
   Mp3(const Settings& settings);
 
   bool isPlaying() const;
+  bool isPausing() const;
   void waitForTrackToFinish();
   void waitForTrackToStart();
   void playAdvertisement(uint16_t     track, bool olnyIfIsPlaying = true);
@@ -158,6 +156,13 @@ public:
   void updateTimer(unsigned long time);
   void flushSerial();
   uint8_t getCurrentTrack() { return playing ? q.get(current_track) : 0; }
+  uint16_t getLastPlayedTrack() { return mp3_track_last; }
+  uint8_t getCurrentTrackFromPlayer();
+  void OnPlayFinished(uint16_t track);
+  void ResetLastTrackFinished() { lastTrackFinished = 0; }
+  uint16_t GetStatus();
+  void SerialStopListening();
+  void SerialStartListening();
 
 #ifdef CHECK_MISSING_ONPLAYFINISHED
   void start() { isPause = false; Base::start(); }
@@ -169,9 +174,11 @@ public:
   void decreaseVolume();
   void setVolume     ();
   void loop          ();
+  void goSleep       ();
+  void wakeup        ();
 
 private:
-
+  uint16_t lastTrackFinished;
   typedef queue<uint8_t, maxTracksInFolder> track_queue;
 
   SoftwareSerial       softwareSerial;
@@ -187,6 +194,7 @@ private:
   // mp3 queue
   uint16_t             mp3_track{};
   uint16_t             mp3_track_next{};
+  uint16_t             mp3_track_last{};
 
   enum play_type: uint8_t {
     play_none,

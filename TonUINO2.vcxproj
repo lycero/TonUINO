@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{42D4B30F-0457-44E3-B0A5-6103999C1E93}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakeOutput>TonUINO2.exe</NMakeOutput>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;__AVR_ATmega328p__;ARDUINO_ARCH_AVR;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath>C:\Users\Cheffe\AppData\Local\Arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7\avr\include;C:\Repos\libraries;C:\Users\Cheffe\AppData\Local\Arduino15\packages\arduino\hardware\avr\1.8.6\cores\arduino;$(ProjectDir)..\..\Users\Cheffe\AppData\Local\Arduino15\packages\arduino\hardware\avr\1.8.6\libraries\EEPROM\src;$(ProjectDir)..\..\users\cheffe\appdata\local\arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7\avr\include;$(ProjectDir)..\..\users\cheffe\appdata\local\arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7\lib\gcc\avr\7.3.0\include-fixed;$(ProjectDir)..\..\users\cheffe\appdata\local\arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7\lib\gcc\avr\7.3.0\include;$(ProjectDir)..\..\\Users\\Cheffe\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\mega;C:\Repos\libraries\JC_Button\src;$(ProjectDir)..\..\\Users\\Cheffe\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino;C:\Repos\libraries\DFPlayer_Mini_Mp3_by_Makuna\src;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>C:\Users\Cheffe\AppData\Local\Arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7\avr\include\avr\iom328p.h;C:\Users\Cheffe\AppData\Local\Arduino15\packages\arduino\hardware\avr\1.8.6\cores\arduino\Arduino.h;C:\Users\Cheffe\AppData\Local\Arduino15\packages\arduino\hardware\avr\1.8.6\cores\arduino\wiring.c;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NMakeOutput>TonUINO2.exe</NMakeOutput>
+    <NMakePreprocessorDefinitions>_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath>C:\Users\Cheffe\AppData\Local\Arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7\avr\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakeOutput>TonUINO2.exe</NMakeOutput>
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath>C:\Users\Cheffe\AppData\Local\Arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7\avr\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NMakeOutput>TonUINO2.exe</NMakeOutput>
+    <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath>C:\Users\Cheffe\AppData\Local\Arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7\avr\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Cheffe\AppData\Local\Arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7\avr\include;C:\Repos\libraries\JC_Button\src;C:\Users\Cheffe\AppData\Local\Arduino15\packages\arduino\hardware\avr\1.8.6\cores\arduino;C:\Repos\libraries;C:\Repos\libraries\DFPlayer_Mini_Mp3_by_Makuna\src;C:\Users\Cheffe\AppData\Local\Arduino15\packages\arduino\hardware\avr\1.8.6\variants\mega;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>__AVR_ATmega328P__</PreprocessorDefinitions>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\array.hpp" />
+    <ClInclude Include="src\buttons.hpp" />
+    <ClInclude Include="src\ChangeCounter.h" />
+    <ClInclude Include="src\chip_card_v3.hpp" />
+    <ClInclude Include="src\commands.hpp" />
+    <ClInclude Include="src\constants.hpp" />
+    <ClInclude Include="src\log.hpp" />
+    <ClInclude Include="src\logger.hpp" />
+    <ClInclude Include="src\loopModifier.h" />
+    <ClInclude Include="src\modifier.hpp" />
+    <ClInclude Include="src\mp3.hpp" />
+    <ClInclude Include="src\PinChangeInterruptHandler\PinChangeInterruptBoards.h" />
+    <ClInclude Include="src\PinChangeInterruptHandler\PinChangeInterruptHandler.h" />
+    <ClInclude Include="src\PN532\PN532.h" />
+    <ClInclude Include="src\PN532\PN532Interface.h" />
+    <ClInclude Include="src\PN532\PN532_debug.h" />
+    <ClInclude Include="src\PN532\PN532_HSU.h" />
+    <ClInclude Include="src\PN532\PN532_SWHSU.h" />
+    <ClInclude Include="src\queue.hpp" />
+    <ClInclude Include="src\serial_input.hpp" />
+    <ClInclude Include="src\settings.hpp" />
+    <ClInclude Include="src\SoftwareSerialLight\SoftwareSerialLight.h" />
+    <ClInclude Include="src\state_machine.hpp" />
+    <ClInclude Include="src\timer.hpp" />
+    <ClInclude Include="src\tinyfsm.hpp" />
+    <ClInclude Include="src\tonuino.hpp" />
+    <ClInclude Include="src\type_traits.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\buttons.cpp" />
+    <ClCompile Include="src\ChangeCounter.cpp" />
+    <ClCompile Include="src\chip_card_v3.cpp" />
+    <ClCompile Include="src\commands.cpp" />
+    <ClCompile Include="src\log.cpp" />
+    <ClCompile Include="src\loopModifier.cpp" />
+    <ClCompile Include="src\modifier.cpp" />
+    <ClCompile Include="src\mp3.cpp" />
+    <ClCompile Include="src\PinChangeInterruptHandler\PinChangeInterruptHandler.cpp" />
+    <ClCompile Include="src\PN532\PN532.cpp" />
+    <ClCompile Include="src\PN532\PN532_HSU.cpp" />
+    <ClCompile Include="src\PN532\PN532_SWHSU.cpp" />
+    <ClCompile Include="src\serial_input.cpp" />
+    <ClCompile Include="src\settings.cpp" />
+    <ClCompile Include="src\SoftwareSerialLight\SoftwareSerialLight.cpp" />
+    <ClCompile Include="src\state_machine.cpp" />
+    <ClCompile Include="src\timer.cpp" />
+    <ClCompile Include="src\tonuino.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
