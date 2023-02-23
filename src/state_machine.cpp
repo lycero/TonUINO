@@ -599,6 +599,7 @@ bool Base::readCard() {
       LOG(state_log, s_debug, str_Base(), str_to(), str_Admin_Entry());
       Admin_Entry::lastCurrentValue = 0;
       transit<Admin_Entry>();
+      tonuino.ChangeLoopModifier(LoopModifier::LoopModifierId::Active);
       return false;
     }
 
@@ -622,17 +623,18 @@ void Base::handleShortcut(uint8_t shortCut) {
       tonuino.setFolder(&settings.shortCuts[shortCut]);
     if (tonuino.getCard().nfcFolderSettings.folder != 0) {
       LOG(state_log, s_debug, str_Base(), str_to(), str_StartPlay());
+      tonuino.ChangeLoopModifier(LoopModifier::LoopModifierId::LightSleep);
       transit<StartPlay>();
     }
   }
 }
 
 void Base::handleReadCard() {
-  tonuino.ChangePowerState(WakeupSource::CardReader);
   if (lastCardRead.nfcFolderSettings.mode != mode_t::repeat_last)
     tonuino.setCard(lastCardRead);
   if (tonuino.getCard().nfcFolderSettings.folder != 0) {
     LOG(state_log, s_debug, str_Base(), str_to(), str_StartPlay());
+    tonuino.ChangeLoopModifier(LoopModifier::LoopModifierId::LightSleep);
     transit<StartPlay>();
   }
 }

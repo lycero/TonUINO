@@ -34,6 +34,8 @@ public:
 
   void setup          ();
   void loop           (WakeupSource source);
+  void ChangeLoopModifier(LoopModifier::LoopModifierId id);
+  void runActiveLoop  ();
 
   void playFolder     ();
   void playTrackNumber();
@@ -59,17 +61,8 @@ public:
 
 private:
 
-  void ChangePowerState(WakeupSource source);
-  void HandlePowerStateChange(PowerState newState, PowerState oldState);
-  void HandlePowerWakup(PowerState newState, PowerState oldState);
-  void HandlePowerGoSleep(PowerState newState, PowerState oldState);
-  void logPowerStateChange(PowerState newState, PowerState oldState);
-  const __FlashStringHelper* getPowerStateName(PowerState state);
+  void ReactOnWakeup(WakeupSource source);
   bool specialCard(const nfcTagObject &nfcTag);
-  void checkNfc();
-  void checkInputs();
-  void loopMp3();
-  void UpdatePowerState(unsigned long startCycle);
   bool isKeepAwake();
   unsigned long getWatchDogMillis();
   unsigned long getWatchDogMillis(uint8_t time);
@@ -91,18 +84,21 @@ private:
   ToddlerMode          toddlerMode         {*this, mp3, settings};
   KindergardenMode     kindergardenMode    {*this, mp3, settings};
   RepeatSingleModifier repeatSingleModifier{*this, mp3, settings};
-  //FeedbackModifier     feedbackModifier    {*this, mp3, settings};
 
   Modifier*            activeModifier      {&noneModifier};
-  LoopModifier::LoopModifier* activeLoopModifier{};
 
-  Timer                sleepStateTimer     {};
-  Timer                cardSleepTimer      {};
+  LoopModifier::Active loopActive{ *this, mp3, settings };
+  LoopModifier::KeyRead loopKeyRead{ *this, commands, settings };
+  LoopModifier::CardRead loopCardRead{ *this, chip_card, settings };
+  LoopModifier::LightSleep loopLightSleep{ *this, mp3, settings };
+  LoopModifier::DeepSleep loopDeepSleep{ *this, mp3, settings };
+  LoopModifier::VeryDeepSleep loopVeryDeepSleep{ *this, mp3, settings };
+
+  LoopModifier::LoopModifier* activeLoopModifier{&loopActive};
 
   nfcTagObject         myCard              {};
   folderSettings*      myFolder            {&myCard.nfcFolderSettings};
   uint16_t             numTracksInFolder   {};
-  PowerState           powerState          {PowerState::Active};
   volatile uint8_t     myKeepAwake         {0};
 };
 

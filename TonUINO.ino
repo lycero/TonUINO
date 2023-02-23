@@ -27,8 +27,8 @@ ISR(WDT_vect)
 }
 
 ChangeCounter pauseCounter(buttonPausePin);
-ChangeCounter nextCounter(buttonUpPin);
-ChangeCounter prevCounter(buttonDownPin);
+// ChangeCounter nextCounter(buttonUpPin);
+// ChangeCounter prevCounter(buttonDownPin);
 ChangeCounter mp3BusyCounter(dfPlayer_busyPin);
 
 void setup()
@@ -53,8 +53,8 @@ void setup()
 
 	cli();
 	pauseCounter.begin();
-	prevCounter.begin();
-	nextCounter.begin();
+	// prevCounter.begin();
+	// nextCounter.begin();
 	mp3BusyCounter.begin();
 	sei();
 
@@ -67,7 +67,7 @@ void setup()
 		ADCSeed ^= ADC_LSB << (i % 32);
 	}
 	randomSeed(ADCSeed); // Zufallsgenerator initialisieren
-delay(499);
+
 	// // Dieser Hinweis darf nicht entfernt werden
 	LOG(init_log, s_debug, F(" _____         _____ _____ _____ _____"));
 	LOG(init_log, s_debug, F("|_   _|___ ___|  |  |     |   | |     |"));
@@ -86,14 +86,19 @@ void loop()
 	if (watchDogToggle)
 	{
 		watchDogToggle = false;
+    LOG(loop_log, s_debug, F("Watchdog"));
 		Tonuino::getTonuino().loop(WakeupSource::Watchdog);
 	}
 	else if (mp3BusyCounter.getRise())
 	{
+
+    LOG(loop_log, s_debug, F("Mp3BusyChange")); 
 		Tonuino::getTonuino().loop(WakeupSource::Mp3BusyChange);
 	}
-	else if (pauseCounter.getRise() || prevCounter.getRise() || nextCounter.getRise())
+	//else if (pauseCounter.getRise() || prevCounter.getRise() || nextCounter.getRise())
+	else if (pauseCounter.getRise())
 	{
+    LOG(loop_log, s_debug, F("KeyInput"));
 		Tonuino::getTonuino().loop(WakeupSource::KeyInput);
 	}
 	else
