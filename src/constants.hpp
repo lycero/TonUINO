@@ -20,16 +20,25 @@ inline constexpr int getLevel(levelType t, level l) {
 		: (t == levelType::activeHigh ? HIGH : LOW);
 }
 
+#define TESTBOARD
+
 // ####### buttons #####################################
 
 // uncomment the below line to enable five button support
 //#define FIVEBUTTONS
 
 inline constexpr uint32_t buttonLongPress = 1000; // timeout for long press button in ms
+#ifndef TESTBOARD
 inline constexpr uint8_t  buttonPausePin = 10;
 inline constexpr uint8_t  buttonUpPin = 11;
 inline constexpr uint8_t  buttonDownPin = 12;
 inline constexpr uint8_t  resetPin = 6;
+#else
+inline constexpr uint8_t  buttonPausePin = 62;
+inline constexpr uint8_t  buttonUpPin = 64;
+inline constexpr uint8_t  buttonDownPin = 65;
+inline constexpr uint8_t  resetPin = 43;
+#endif // !TESTBOARD
 
 #ifdef FIVEBUTTONS
 inline constexpr uint8_t  buttonFourPin = A3;
@@ -47,19 +56,26 @@ inline constexpr uint8_t  cardRemoveDelay = 1;
 inline constexpr unsigned long cardSleep = 1000;
 
 // ####### mp3 #########################################
-
 inline constexpr uint8_t       maxTracksInFolder = 255;
+#ifndef TESTBOARD
 inline constexpr uint8_t       dfPlayer_receivePin = A1;
 inline constexpr uint8_t       dfPlayer_transmitPin = A0;
 inline constexpr uint8_t       dfPlayer_busyPin = 9;
 inline constexpr uint8_t       dfPlayer_ampPin = 4;
 inline constexpr uint8_t       dfPlayer_powerPin = 5;
+#else
+inline constexpr uint8_t       dfPlayer_receivePin = 51;
+inline constexpr uint8_t       dfPlayer_transmitPin = 50;
+inline constexpr uint8_t       dfPlayer_busyPin = 63;
+inline constexpr uint8_t       dfPlayer_ampPin = 41;
+inline constexpr uint8_t       dfPlayer_powerPin = 42;
+#endif // !TESTBOARD
 inline constexpr levelType     dfPlayer_busyPinType = levelType::activeLow;
 inline constexpr unsigned long dfPlayer_timeUntilStarts = 3000;
 
 
 // ####### tonuino #####################################
-inline constexpr unsigned long baseTimeMulti = 100;
+inline constexpr unsigned long baseTimeMulti = 10;
 inline constexpr uint8_t openAnalogPin = A7;
 inline constexpr unsigned long cycleTime = 50;
 inline constexpr uint8_t sleepCycleTime = WDTO_2S;

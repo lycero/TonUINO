@@ -6,7 +6,7 @@ class ChangeCounter : PinChangeInterruptHandler
 {
 
 public:
-	ChangeCounter(byte pin);
+	ChangeCounter(uint8_t pin);
 	void begin();
 	void stop();
 	bool getRise();
@@ -14,9 +14,8 @@ public:
 	// Overwrite handlePCInterrupt() method
 	virtual void handlePCInterrupt(int8_t interruptNum, bool value);
 private:
-	byte inputPin;
-	byte inputMode;
-	unsigned long riseCounter;
-	unsigned long fallCounter;
+	uint8_t inputPin;
+	uint8_t riseCounter;
+	uint8_t fallCounter;
 };
 

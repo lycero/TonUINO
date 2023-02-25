@@ -10,7 +10,7 @@
 #include "timer.hpp"
 
 #define CHECK_MISSING_ONPLAYFINISHED
-
+#define DfMiniMp3Debug
 enum class mp3Tracks: uint16_t {
   t_0                          =   0,
   t_262_pling                  = 262,
@@ -159,7 +159,7 @@ public:
   uint16_t getLastPlayedTrack() { return mp3_track_last; }
   uint8_t getCurrentTrackFromPlayer();
   void OnPlayFinished(uint16_t track);
-  void ResetLastTrackFinished() { lastTrackFinished = 0; }
+  void ResetLastTrackFinished() { lastTrackFinished = -1; }
   uint16_t GetStatus();
   void SerialStopListening();
   void SerialStartListening();
@@ -178,7 +178,7 @@ public:
   void wakeup        ();
 
 private:
-  uint16_t lastTrackFinished;
+    uint16_t lastTrackFinished{-1};
   typedef queue<uint8_t, maxTracksInFolder> track_queue;
 
   SoftwareSerial       softwareSerial;

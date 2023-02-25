@@ -43,7 +43,7 @@ public:
   void       nextTrack(bool fromOnPlayFinished = false);
   void   previousTrack();
 
-  void resetActiveModifier   () { activeModifier = &noneModifier; }
+  void resetActiveModifier();
   Modifier& getActiveModifier() { return *activeModifier; }
 
   void setCard  (const nfcTagObject   &newCard) { myCard = newCard; setFolder(&myCard.nfcFolderSettings); }

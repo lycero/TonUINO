@@ -47,11 +47,20 @@ LoopModifierId KeyRead::GetTransition()
 	if(_lastCommand == commandRaw::none && !_delayTimer.isExpired())
 		return LoopModifierId::None;
 
-	if (_delayTimer.isExpired())
-		return LoopModifierId::LightSleep;
-
 	if(_lastCommand == commandRaw::pause)
 		return LoopModifierId::CardRead;
+
+	if (digitalRead(buttonPausePin))
+		return LoopModifierId::None;
+
+	if (digitalRead(buttonUpPin))
+		return LoopModifierId::None;
+
+	if (digitalRead(buttonDownPin))
+		return LoopModifierId::None;
+
+	if (_delayTimer.isExpired())
+		return LoopModifierId::LightSleep;
 
 	return LoopModifierId::None;
 }
@@ -74,9 +83,9 @@ void CardRead::Loop()
 	if (!cardSleepTimer.isExpired())
 			return;
 
-	//card.wakeCard();
-	//SM_tonuino::dispatch(card_e(card.getCardEvent()));
-	//card.sleepCard();
+	card.wakeCard();
+	SM_tonuino::dispatch(card_e(card.getCardEvent()));
+	card.sleepCard();
 
 	cardSleepTimer.start(cardSleep);
 }
@@ -112,6 +121,7 @@ void LightSleep::Init()
 void LightSleep::Loop()
 {
 	SM_tonuino::dispatch(command_e(commandRaw::none));
+	mp3.loop();
 	if (mp3.isPlaying())
 		_delayTimer.start(lightSleepTimerDuration);
 }
@@ -183,10 +193,13 @@ void VeryDeepSleep::Loop()
 
 void VeryDeepSleep::HandleModifierChange(LoopModifierId newModifier)
 {
-	LOG(loop_log, s_debug, F("Reset"));
 	wdt_reset();
-	delay(500);
-	digitalWrite(resetPin, 1);
+	if (loop_log::will_log(s_debug)) 
+	{
+		LOG(loop_log, s_debug, F("Reset"));
+		delay(500);
+	}
+	digitalWrite(resetPin, 0);
 }
 
 void VeryDeepSleep::EndCycle(unsigned long startCycle)

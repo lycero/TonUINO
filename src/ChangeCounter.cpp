@@ -1,7 +1,7 @@
 #include "ChangeCounter.h"
 #include "tonuino.hpp"
 
-ChangeCounter::ChangeCounter(byte pin)
+ChangeCounter::ChangeCounter(uint8_t pin)
 	: riseCounter(0)
 	, fallCounter(0)
 	, inputPin(pin)

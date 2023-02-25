@@ -27,8 +27,8 @@ ISR(WDT_vect)
 }
 
 ChangeCounter pauseCounter(buttonPausePin);
-// ChangeCounter nextCounter(buttonUpPin);
-// ChangeCounter prevCounter(buttonDownPin);
+ChangeCounter nextCounter(buttonUpPin);
+ChangeCounter prevCounter(buttonDownPin);
 ChangeCounter mp3BusyCounter(dfPlayer_busyPin);
 
 void setup()
@@ -39,22 +39,15 @@ void setup()
   pinMode(dfPlayer_powerPin, OUTPUT);
 	digitalWrite(dfPlayer_powerPin, 0);
 
-	//setup pinModes
-	digitalWrite(dfPlayer_transmitPin, 1);
-	pinMode(dfPlayer_transmitPin, OUTPUT);
-
 	digitalWrite(dfPlayer_ampPin, 1);
 	pinMode(dfPlayer_ampPin, OUTPUT);
-
-	pinMode(dfPlayer_receivePin, INPUT);
-	digitalWrite(dfPlayer_receivePin, 1);
 
 	pinMode(dfPlayer_busyPin, INPUT_PULLUP);
 
 	cli();
 	pauseCounter.begin();
-	// prevCounter.begin();
-	// nextCounter.begin();
+	prevCounter.begin();
+	nextCounter.begin();
 	mp3BusyCounter.begin();
 	sei();
 
@@ -83,23 +76,18 @@ void setup()
 
 void loop()
 {
-	if (watchDogToggle)
+	if (pauseCounter.getRise() || prevCounter.getRise() || nextCounter.getRise())
 	{
-		watchDogToggle = false;
-    LOG(loop_log, s_debug, F("Watchdog"));
-		Tonuino::getTonuino().loop(WakeupSource::Watchdog);
+		Tonuino::getTonuino().loop(WakeupSource::KeyInput);
 	}
 	else if (mp3BusyCounter.getRise())
 	{
-
-    LOG(loop_log, s_debug, F("Mp3BusyChange")); 
 		Tonuino::getTonuino().loop(WakeupSource::Mp3BusyChange);
 	}
-	//else if (pauseCounter.getRise() || prevCounter.getRise() || nextCounter.getRise())
-	else if (pauseCounter.getRise())
+  else if (watchDogToggle)
 	{
-    LOG(loop_log, s_debug, F("KeyInput"));
-		Tonuino::getTonuino().loop(WakeupSource::KeyInput);
+		watchDogToggle = false;
+		Tonuino::getTonuino().loop(WakeupSource::Watchdog);
 	}
 	else
 	{

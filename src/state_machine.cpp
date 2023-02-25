@@ -633,8 +633,7 @@ void Base::handleReadCard() {
   if (lastCardRead.nfcFolderSettings.mode != mode_t::repeat_last)
     tonuino.setCard(lastCardRead);
   if (tonuino.getCard().nfcFolderSettings.folder != 0) {
-    LOG(state_log, s_debug, str_Base(), str_to(), str_StartPlay());
-    tonuino.ChangeLoopModifier(LoopModifier::LoopModifierId::LightSleep);
+    LOG(state_log, s_debug, str_Base(), str_to(), str_StartPlay());  
     transit<StartPlay>();
   }
 }
@@ -718,6 +717,7 @@ void Idle::react(card_e const &c_e) {
 void Play::entry() {
   LOG(state_log, s_info, str_enter(), str_Play());
   mp3.start();
+  tonuino.ChangeLoopModifier(LoopModifier::LoopModifierId::LightSleep);
 };
 
 void Play::react(command_e const &cmd_e) {

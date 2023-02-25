@@ -58,7 +58,11 @@ const byte trailerBlock = 7;
 
 Chip_card::Chip_card(Mp3 &mp3)
 : mp3(mp3)
+#ifndef TESTBOARD
 , pn532hsu(Serial)
+#else
+, pn532hsu(Serial3)
+#endif // !TESTBOARD
 , pn532(pn532hsu)
 , cardRemovedSwitch(cardRemoveDelay)
 {

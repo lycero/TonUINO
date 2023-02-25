@@ -39,21 +39,19 @@ void Tonuino::setup()
 {
 	SetupWatchDog(sleepCycleTime);
 
-	//pinMode(dfPlayer_ampPin, OUTPUT);
-	//digitalWrite(dfPlayer_ampPin, 0);
 	// load Settings from EEPROM
 	settings.loadSettingsFromFlash();
 
 	// NFC Leser initialisieren
 	delay(25);
-	//chip_card.initCard();
+	chip_card.initCard();
 
 	digitalWrite(dfPlayer_powerPin, 1);
 	delay(25);
 	// DFPlayer Mini initialisieren
 	mp3.begin();
 	// // Zwei Sekunden warten bis der DFPlayer Mini initialisiert ist
-	delay(1500);
+	delay(2000);
 	digitalWrite(dfPlayer_ampPin, 0);
 	mp3.setVolume();
 	mp3.setEq(static_cast<DfMp3_Eq>(settings.eq - 1));
@@ -65,23 +63,11 @@ void Tonuino::setup()
 		settings.loadSettingsFromFlash();
 	}
 
-	activeLoopModifier->Init();
+	//activeLoopModifier->Init();
+	ChangeLoopModifier(LoopModifier::LoopModifierId::Active);
 	SM_tonuino::start();
 	// Start Shortcut "at Startup" - e.g. Welcome Sound
 	SM_tonuino::dispatch(command_e(commandRaw::start));
-
-
-	delay(200);
-	mp3.enqueueTrack(6,2);
-	mp3.enqueueTrack(6,1);
-	mp3.enqueueTrack(6,2);
-	mp3.enqueueTrack(6,1);
-	mp3.enqueueTrack(6, 2);
-	mp3.enqueueTrack(6, 1);
-	mp3.enqueueTrack(6,3);
-	mp3.enqueueTrack(6, 2);
-	mp3.enqueueTrack(6, 1);
-	mp3.playCurrent();
 
 	//ChangeLoopModifier(LoopModifier::LoopModifierId::LightSleep);
 }
@@ -112,40 +98,82 @@ void Tonuino::loop(WakeupSource source)
 
 void Tonuino::ChangeLoopModifier(LoopModifier::LoopModifierId id)
 {
-	activeLoopModifier->HandleModifierChange(id);
+	if (id == LoopModifier::LoopModifierId::None)
+		return;
+
+	if (activeModifier != &noneModifier && id != LoopModifier::LoopModifierId::Active)
+		return;
+
+	if (!SM_tonuino::is_in_state<Play>() && 
+		!SM_tonuino::is_in_state<Idle>() && 
+		!SM_tonuino::is_in_state<Pause>() && 
+		!SM_tonuino::is_in_state<StartPlay>() &&
+		id != LoopModifier::LoopModifierId::Active)
+		return;	
+
+	LoopModifier::LoopModifier* newModifier = activeLoopModifier;
+	
 	switch (id)
 	{
 	case LoopModifier::LoopModifierId::None:
 		break;
 	case LoopModifier::LoopModifierId::Active:
-		LOG(loop_log, s_debug, F("Active Loop"));
-		activeLoopModifier = &loopActive;
+		newModifier = &loopActive;
 		break;
 	case LoopModifier::LoopModifierId::KeyRead:
-		LOG(loop_log, s_debug, F("KeyRead Loop"));
-		activeLoopModifier = &loopKeyRead;
+		newModifier = &loopKeyRead;
 		break;
 	case LoopModifier::LoopModifierId::CardRead:
-		LOG(loop_log, s_debug, F("CardRead Loop"));
-		activeLoopModifier = &loopCardRead;
+		newModifier = &loopCardRead;
 		break;
 	case LoopModifier::LoopModifierId::LightSleep:
-		LOG(loop_log, s_debug, F("LightSleep Loop"));
-		activeLoopModifier = &loopLightSleep;
+		newModifier = &loopLightSleep;
 		break;
 	case LoopModifier::LoopModifierId::DeepSleep:
-		LOG(loop_log, s_debug, F("DeepSleep Loop"));
-		activeLoopModifier = &loopDeepSleep;
+		newModifier = &loopDeepSleep;
 		break;
 	case LoopModifier::LoopModifierId::VeryDeepSleep:
-		LOG(loop_log, s_debug, F("VeryDeepSleep Loop"));
-		activeLoopModifier = &loopVeryDeepSleep;
+		newModifier = &loopVeryDeepSleep;
 		break;
 	default:
 		break;
 	}
-	if (loop_log::will_log(s_debug))
+
+	if (newModifier == activeLoopModifier)
+		return;
+
+	activeLoopModifier->HandleModifierChange(id);
+	activeLoopModifier = newModifier;
+
+	if (loop_log::will_log(s_debug)) 
+	{
+		switch (id)
+		{
+		case LoopModifier::LoopModifierId::None:
+			break;
+		case LoopModifier::LoopModifierId::Active:
+			LOG(loop_log, s_debug, F("# -> Active Loop"));
+			break;
+		case LoopModifier::LoopModifierId::KeyRead:
+			LOG(loop_log, s_debug, F("# -> KeyRead Loop"));
+			break;
+		case LoopModifier::LoopModifierId::CardRead:
+			LOG(loop_log, s_debug, F("# -> CardRead Loop"));
+			break;
+		case LoopModifier::LoopModifierId::LightSleep:
+			LOG(loop_log, s_debug, F("# -> LightSleep Loop"));
+			break;
+		case LoopModifier::LoopModifierId::DeepSleep:
+			LOG(loop_log, s_debug, F("# -> DeepSleep Loop"));
+			break;
+		case LoopModifier::LoopModifierId::VeryDeepSleep:
+			LOG(loop_log, s_debug, F("# -> VeryDeepSleep Loop"));
+			break;
+		default:
+			break;
+		}
 		delay(50);
+	}
 
 	activeLoopModifier->Init();
 }
@@ -154,14 +182,14 @@ void Tonuino::runActiveLoop()
 {
 	unsigned long start_cycle = millis();
 
-	mp3.loop();
-	activeModifier->loop();
-
 	SM_tonuino::dispatch(command_e(commands.getCommandRaw()));
 
-	//chip_card.wakeCard();
-	//SM_tonuino::dispatch(card_e(chip_card.getCardEvent()));
-	//chip_card.sleepCard();
+	chip_card.wakeCard();
+	SM_tonuino::dispatch(card_e(chip_card.getCardEvent()));
+	chip_card.sleepCard();
+
+	mp3.loop();
+	activeModifier->loop();
 
 	unsigned long stop_cycle = millis();
 	if (stop_cycle - start_cycle < cycleTime)
@@ -276,6 +304,12 @@ void Tonuino::previousTrack()
 	mp3.playPrevious();
 }
 
+void Tonuino::resetActiveModifier() 
+{ 
+	activeModifier = &noneModifier;
+	ChangeLoopModifier(LoopModifier::LoopModifierId::Active);
+}
+
 void Tonuino::keepAwake() 
 {
 	wdt_reset();
@@ -346,21 +380,16 @@ bool Tonuino::specialCard(const nfcTagObject& nfcTag)
 
 void Tonuino::ReactOnWakeup(WakeupSource source)
 {
-	if (loop_log::will_log(s_debug))
-		delay(50);
-
-	//wdt_reset();
+	wdt_reset();
 	switch (source)
 	{
 	case WakeupSource::None:
 	{
-		/* code */
-		wdt_reset();
+		/* code */		
 		break;
 	}
 	case WakeupSource::Watchdog:
 	{
-		//LOG(powerstate_log, s_debug, F("Watchdog:"), millis());
 		auto wdmillis = getWatchDogMillis();
 		activeLoopModifier->UpdateTimer(wdmillis);
 		mp3.updateTimer(wdmillis);
@@ -368,19 +397,25 @@ void Tonuino::ReactOnWakeup(WakeupSource source)
 	}
 	case WakeupSource::KeyInput:
 	{
-		commands.getCommandRaw();
+		//commands.getCommandRaw();
 		ChangeLoopModifier(LoopModifier::LoopModifierId::KeyRead);
 		break;
 	}
 
 	case WakeupSource::Mp3BusyChange:
 	{
-		wdt_reset();
 		myKeepAwake++;
-		if ((mp3.isPlayingFolder() || mp3.isPlayingMp3()) && !mp3.isPlaying()) 
-		{
-			mp3.OnPlayFinished(mp3.getLastPlayedTrack());
-		}		
+		if (!SM_tonuino::is_in_state<Play>())
+			break;
+
+		if (!(mp3.isPlayingFolder() || mp3.isPlayingMp3()) || mp3.isPlaying())
+			break;
+
+		if (activeLoopModifier->GetModifierId() == LoopModifier::LoopModifierId::KeyRead)
+			break;
+
+		mp3.OnPlayFinished(mp3.getLastPlayedTrack());
+				
 		break;
 	}
 	default:

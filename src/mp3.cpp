@@ -95,7 +95,7 @@ void Mp3::clearMp3Queue() {
   mp3_track_next = 0;
 }
 void Mp3::enqueueTrack(uint8_t folder, uint8_t firstTrack, uint8_t lastTrack, uint8_t currentTrack) {
-  //clearAllQueue();
+  clearAllQueue();
   current_folder = folder;
   for (uint8_t i = firstTrack; i<=lastTrack; ++i) {
     LOG(mp3_log, s_info, F("enqueue "), folder, F("-"), i);
