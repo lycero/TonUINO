@@ -1,7 +1,6 @@
 #include "chip_card_v3.hpp"
 
 #include <Arduino.h>
-//#include <SPI.h>
 
 #include "mp3.hpp"
 #include "constants.hpp"
@@ -10,17 +9,10 @@
 
 // select whether StatusCode and PiccType are printed as names
 // that uses about 690 bytes or 2.2% of flash
-constexpr bool verbosePrintStatusCode = true;
+constexpr bool verbosePrintStatusCode = false;
 constexpr bool verbosePrintPiccType   = false;
 
 namespace {
-
-constexpr size_t buffferSizeRead  = 18; // buffer size for read and write
-constexpr size_t buffferSizeWrite = 16; // buffer size for read and write
-
-// const __FlashStringHelper* str_failed      () { return F(" failed: ") ; }
-// const __FlashStringHelper* str_MIFARE_Read () { return F("MIFARE_Read ") ; }
-// const __FlashStringHelper* str_MIFARE_Write() { return F("MIFARE_Write ") ; }
 
 /**
   Helper routine to dump a byte array as hex values to Serial.
@@ -59,11 +51,12 @@ const byte trailerBlock = 7;
 Chip_card::Chip_card(Mp3 &mp3)
 : mp3(mp3)
 #ifndef TESTBOARD
-, pn532hsu(Serial)
+//, pn532Serial(Serial)
+, pn532Serial(Wire)
 #else
 , pn532hsu(Serial3)
 #endif // !TESTBOARD
-, pn532(pn532hsu)
+, pn532(pn532Serial)
 , cardRemovedSwitch(cardRemoveDelay)
 {
 }
@@ -104,8 +97,9 @@ bool Chip_card::readCard(nfcTagObject &nfcTag)
   if(!success)
     return false;
   
- // LOG(card_log, s_info, F("Data Read "), dump_byte_array(buffer, bufferSize));
-  PN532::PrintHex(buffer, bufferSize);
+  if (card_log::will_log(s_info)) {
+      PN532::PrintHex(buffer, bufferSize);
+  }
 
   const uint32_t version = buffer[4];
   if (version == cardVersion)
@@ -131,27 +125,30 @@ bool Chip_card::writeCard(const nfcTagObject &nfcTag) {
 
 void Chip_card::sleepCard() {
     pn532.setRFField( 0x00, 0x00);  
-    pn532.shutPowerDown();  
+    //pn532.shutPowerDown(); 
 }
 
 void Chip_card::wakeCard() {
-    pn532.wakeup();
+    //pn532.wakeup();
     pn532.setRFField( 0x02, 0x01);
 }
 
 void Chip_card::initCard()
-{
+{    
   pn532.begin();
   uint32_t versiondata = pn532.getFirmwareVersion();
   if (!versiondata)
-  {
-    LOG(card_log, s_debug, F("Didn't Find PN53x Module"));
+  {      
+    LOG(card_log, s_debug, F("Didn't Find PN53x Module"));    
     digitalWrite(resetPin, LOW);
+    while (1);
     return;
   }
 
   LOG(card_log, s_debug, F("Found chip PN532") );
   LOG(card_log, s_debug, F("Firmware ver. ") , (versiondata >> 16) & 0xFF,  F("."), (versiondata >> 8) & 0xFF);
+
+  delay(250);
 
   // Configure board to read RFID tags
   pn532.SAMConfig();
@@ -187,8 +184,10 @@ cardEvent Chip_card::getCardEvent()
     if (cardRemoved)
     {
       LOG(card_log, s_info, F("Card Inserted"));
-      PN532::PrintHex(uid, uidLength);
-      //cardRemoved = false;
+      if (card_log::will_log(s_info)) {
+          PN532::PrintHex(uid, uidLength);
+      }
+      cardRemoved = false;
       cardType = success;
       return cardEvent::inserted;
     }

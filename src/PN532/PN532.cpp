@@ -219,7 +219,7 @@ bool PN532::SAMConfig(void)
     pn532_packetbuffer[2] = 0x14; // timeout 50ms * 20 = 1 second
     pn532_packetbuffer[3] = 0x01; // use IRQ pin!
 
-    DMSG("SAMConfig\n");
+    DMSG_STR(F("SAMConfig\n"));
 
     if (HAL(writeCommand)(pn532_packetbuffer, 4))
         return false;
@@ -385,11 +385,6 @@ int PN532::readPassiveTargetID(uint8_t cardbaudrate, uint8_t *uid, uint8_t *uidL
     sens_res <<= 8;
     sens_res |= pn532_packetbuffer[3];
 
-    Serial.print("ATQA: 0x");  Serial.print(sens_res);
-    Serial.print(" SAK: ");  Serial.print(pn532_packetbuffer[4]);
-    Serial.print("\n");
-    Serial.println(pn532_packetbuffer[5]);
-    /* Card appears to be Mifare Classic */
     *uidLength = pn532_packetbuffer[5];
 
     for (uint8_t i = 0; i < pn532_packetbuffer[5]; i++) {
@@ -409,13 +404,11 @@ int PN532::readPassiveTargetID(uint8_t cardbaudrate, uint8_t *uid, uint8_t *uidL
 
         iso14443a_crc_append(pn532_packetbuffer, 8);
         if (HAL(writeCommand)(pn532_packetbuffer, 10)) {
-            //Serial.print("write failed");
             return 0x0;  // command failed
         }
 
         // read data packet
         if (HAL(readResponse)(pn532_packetbuffer, sizeof(pn532_packetbuffer), timeout) < 0) {
-            //Serial.print("readResponse failed");
             return 0x0;
         }
         // Serial.print("R1:");  Serial.print(pn532_packetbuffer[0]);
@@ -427,21 +420,14 @@ int PN532::readPassiveTargetID(uint8_t cardbaudrate, uint8_t *uid, uint8_t *uidL
 
         iso14443a_crc_append(pn532_packetbuffer, 3);
         if (HAL(writeCommand)(pn532_packetbuffer, 5)) {
-            //Serial.print("write failed");
             return 0x0;  // command failed
         }
 
         // read data packet
         if (HAL(readResponse)(pn532_packetbuffer, sizeof(pn532_packetbuffer), timeout) < 0) {
-            //Serial.print("readResponse failed");
             return 0x0;
         }
-        Serial.print("R1:");  Serial.print(pn532_packetbuffer[0]);
-        Serial.print(" R2:");  Serial.print(pn532_packetbuffer[1]);
-        Serial.print(" R3:");  Serial.print(pn532_packetbuffer[2]);
-        Serial.print(" R4:");  Serial.print(pn532_packetbuffer[3]);
-        Serial.print(" R5:");  Serial.print(pn532_packetbuffer[4]);
-        Serial.println();
+
         inListedTag = _inListedTag;
         return 2;
     }
@@ -529,7 +515,7 @@ uint8_t PN532::mifareclassic_AuthenticateBlock (uint8_t *uid, uint8_t uidLen, ui
     // for an auth success it should be bytes 5-7: 0xD5 0x41 0x00
     // Mifare auth error is technically byte 7: 0x14 but anything other and 0x00 is not good
     if (pn532_packetbuffer[0] != 0x00) {
-        DMSG("Authentification failed\n");
+        DMSG(F("Authentification failed\n"));
         return 0;
     }
 
@@ -551,7 +537,7 @@ uint8_t PN532::mifareclassic_AuthenticateBlock (uint8_t *uid, uint8_t uidLen, ui
 /**************************************************************************/
 uint8_t PN532::mifareclassic_ReadDataBlock (uint8_t blockNumber, uint8_t *data)
 {
-    DMSG("Trying to read 16 bytes from block ");
+    DMSG(F("Trying to read 16 bytes from block "));
     DMSG_INT(blockNumber);
 
     /* Prepare the command */
@@ -625,7 +611,7 @@ uint8_t PN532::mifareclassic_WriteDataBlock (uint8_t blockNumber, uint8_t *data)
     if (status < 0) {
         return;
     }
-    DMSG("Shutdown finished");
+    DMSG(F("Shutdown finished"));
     DMSG(status);    
     return;
  }
@@ -662,7 +648,7 @@ bool PN532::inDataExchange(uint8_t *send, uint8_t sendLength, uint8_t *response,
     }
 
     if ((response[0] & 0x3f) != 0) {
-        DMSG("Status code indicates an error\n");
+        DMSG(F("Status code indicates an error\n"));
         return false;
     }
 
@@ -693,7 +679,7 @@ bool PN532::inListPassiveTarget()
     pn532_packetbuffer[1] = 1;
     pn532_packetbuffer[2] = 0;
 
-    DMSG("inList passive target\n");
+    DMSG(F("inList passive target\n"));
 
     if (HAL(writeCommand)(pn532_packetbuffer, 3)) {
         return false;

@@ -174,10 +174,10 @@ private:
     uint8_t _uidLen;  // uid len
     uint8_t _key[6];  // Mifare Classic key
     uint8_t inListedTag; // Tg number of inlisted tag.
-    uint8_t _felicaIDm[8]; // FeliCa IDm (NFCID2)
-    uint8_t _felicaPMm[8]; // FeliCa PMm (PAD)
+   // uint8_t _felicaIDm[8]; // FeliCa IDm (NFCID2)
+   // uint8_t _felicaPMm[8]; // FeliCa PMm (PAD)
 
-    uint8_t pn532_packetbuffer[64];
+    uint8_t pn532_packetbuffer[48];
 
     PN532Interface *_interface;
 };

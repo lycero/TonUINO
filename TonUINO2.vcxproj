@@ -93,28 +93,27 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\AltSoftSerial.h" />
     <ClInclude Include="src\array.hpp" />
     <ClInclude Include="src\buttons.hpp" />
-    <ClInclude Include="src\ChangeCounter.h" />
     <ClInclude Include="src\chip_card_v3.hpp" />
     <ClInclude Include="src\commands.hpp" />
+    <ClInclude Include="src\config\AltSoftSerial_Boards.h" />
+    <ClInclude Include="src\config\AltSoftSerial_Timers.h" />
     <ClInclude Include="src\constants.hpp" />
+    <ClInclude Include="src\InputTrigger.h" />
     <ClInclude Include="src\log.hpp" />
     <ClInclude Include="src\logger.hpp" />
     <ClInclude Include="src\loopModifier.h" />
     <ClInclude Include="src\modifier.hpp" />
     <ClInclude Include="src\mp3.hpp" />
-    <ClInclude Include="src\PinChangeInterruptHandler\PinChangeInterruptBoards.h" />
-    <ClInclude Include="src\PinChangeInterruptHandler\PinChangeInterruptHandler.h" />
     <ClInclude Include="src\PN532\PN532.h" />
     <ClInclude Include="src\PN532\PN532Interface.h" />
     <ClInclude Include="src\PN532\PN532_debug.h" />
     <ClInclude Include="src\PN532\PN532_HSU.h" />
-    <ClInclude Include="src\PN532\PN532_SWHSU.h" />
+    <ClInclude Include="src\PN532\PN532_I2C.h" />
     <ClInclude Include="src\queue.hpp" />
-    <ClInclude Include="src\serial_input.hpp" />
     <ClInclude Include="src\settings.hpp" />
-    <ClInclude Include="src\SoftwareSerialLight\SoftwareSerialLight.h" />
     <ClInclude Include="src\state_machine.hpp" />
     <ClInclude Include="src\timer.hpp" />
     <ClInclude Include="src\tinyfsm.hpp" />
@@ -122,21 +121,19 @@
     <ClInclude Include="src\type_traits.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AltSoftSerial.cpp" />
     <ClCompile Include="src\buttons.cpp" />
-    <ClCompile Include="src\ChangeCounter.cpp" />
     <ClCompile Include="src\chip_card_v3.cpp" />
     <ClCompile Include="src\commands.cpp" />
+    <ClCompile Include="src\InputTrigger.cpp" />
     <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\loopModifier.cpp" />
     <ClCompile Include="src\modifier.cpp" />
     <ClCompile Include="src\mp3.cpp" />
-    <ClCompile Include="src\PinChangeInterruptHandler\PinChangeInterruptHandler.cpp" />
     <ClCompile Include="src\PN532\PN532.cpp" />
     <ClCompile Include="src\PN532\PN532_HSU.cpp" />
-    <ClCompile Include="src\PN532\PN532_SWHSU.cpp" />
-    <ClCompile Include="src\serial_input.cpp" />
+    <ClCompile Include="src\PN532\PN532_I2C.cpp" />
     <ClCompile Include="src\settings.cpp" />
-    <ClCompile Include="src\SoftwareSerialLight\SoftwareSerialLight.cpp" />
     <ClCompile Include="src\state_machine.cpp" />
     <ClCompile Include="src\timer.cpp" />
     <ClCompile Include="src\tonuino.cpp" />

@@ -9,26 +9,26 @@ const __FlashStringHelper* str_Volume() { return F("Volume: ") ; }
 
 }
 
-void Mp3Notify::OnError(DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, uint16_t errorCode) {
+void Mp3Notify::OnError(DFMiniMp3<MySerial, Mp3Notify>& sender, uint16_t errorCode) {
   // see DfMp3_Error for code meaning
   LOG(mp3_log, s_error, F("DfPlayer Error: "), errorCode);
 }
-void Mp3Notify::OnPlaySourceOnline  (DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source) { PrintlnSourceAction(source, F("online"  )); }
-void Mp3Notify::OnPlaySourceInserted(DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source) { PrintlnSourceAction(source, F("bereit"  )); }
-void Mp3Notify::OnPlaySourceRemoved (DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source) { PrintlnSourceAction(source, F("entfernt")); }
+void Mp3Notify::OnPlaySourceOnline  (DFMiniMp3<MySerial, Mp3Notify>& sender, DfMp3_PlaySources source) { PrintlnSourceAction(source, F("online"  )); }
+void Mp3Notify::OnPlaySourceInserted(DFMiniMp3<MySerial, Mp3Notify>& sender, DfMp3_PlaySources source) { PrintlnSourceAction(source, F("bereit"  )); }
+void Mp3Notify::OnPlaySourceRemoved (DFMiniMp3<MySerial, Mp3Notify>& sender, DfMp3_PlaySources source) { PrintlnSourceAction(source, F("entfernt")); }
 void Mp3Notify::PrintlnSourceAction(DfMp3_PlaySources source, const __FlashStringHelper* action) {
   if (source & DfMp3_PlaySources_Sd   ) LOG(mp3_log, s_debug, F("SD Karte "), action);
   if (source & DfMp3_PlaySources_Usb  ) LOG(mp3_log, s_debug, F("USB "     ), action);
   if (source & DfMp3_PlaySources_Flash) LOG(mp3_log, s_debug, F("Flash "   ), action);
 }
 
-void Mp3Notify::OnPlayFinished(DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources /*source*/, uint16_t track) {
+void Mp3Notify::OnPlayFinished(DFMiniMp3<MySerial, Mp3Notify>& sender, DfMp3_PlaySources /*source*/, uint16_t track) {
   Tonuino::getTonuino().OnPlayFinished(track);
 }
 
 Mp3::Mp3(const Settings& settings)
-: Base{softwareSerial}
-, softwareSerial{dfPlayer_receivePin, dfPlayer_transmitPin}
+: Base{ softwareSerial }
+, softwareSerial{}
 , settings{settings}
 {
   // Busy Pin
@@ -154,6 +154,7 @@ void Mp3::playCurrent() {
       playing = play_folder;
     }
   }
+  Tonuino::getTonuino().keepAwake();
 }
 void Mp3::playNext() {
   if (playing == play_folder && current_track+1 < q.size()) {
@@ -220,7 +221,6 @@ uint16_t Mp3::GetStatus()
 
 void Mp3::SerialStopListening()
 {
-    softwareSerial.stopListening();
 }
 
 void Mp3::SerialStartListening()

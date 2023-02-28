@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <DFMiniMp3.h>
-#include "SoftwareSerialLight/SoftwareSerialLight.h"
+#include "AltSoftSerial.h"
 
 #include "settings.hpp"
 #include "queue.hpp"
@@ -115,20 +115,22 @@ enum class advertTracks: uint16_t {
 // implement a notification class,
 // its member methods will get called
 //
+using MySerial = AltSoftSerial;
+
 class Mp3Notify {
 public:
-  static void OnError             (DFMiniMp3<SoftwareSerial, Mp3Notify>&sender, uint16_t errorCode);
-  static void OnPlayFinished      (DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source, uint16_t track);
-  static void OnPlaySourceOnline  (DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source);
-  static void OnPlaySourceInserted(DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source);
-  static void OnPlaySourceRemoved (DFMiniMp3<SoftwareSerial, Mp3Notify>& sender, DfMp3_PlaySources source);
+  static void OnError             (DFMiniMp3<MySerial, Mp3Notify>&sender, uint16_t errorCode);
+  static void OnPlayFinished      (DFMiniMp3<MySerial, Mp3Notify>& sender, DfMp3_PlaySources source, uint16_t track);
+  static void OnPlaySourceOnline  (DFMiniMp3<MySerial, Mp3Notify>& sender, DfMp3_PlaySources source);
+  static void OnPlaySourceInserted(DFMiniMp3<MySerial, Mp3Notify>& sender, DfMp3_PlaySources source);
+  static void OnPlaySourceRemoved (DFMiniMp3<MySerial, Mp3Notify>& sender, DfMp3_PlaySources source);
 private:
   static void PrintlnSourceAction (DfMp3_PlaySources source, const __FlashStringHelper* action);  
 };
 
-class Mp3: public DFMiniMp3<SoftwareSerial, Mp3Notify> {
+class Mp3: public DFMiniMp3<MySerial, Mp3Notify> {
 public:
-  using Base = DFMiniMp3<SoftwareSerial, Mp3Notify>;
+  using Base = DFMiniMp3<MySerial, Mp3Notify>;
   Mp3(const Settings& settings);
 
   bool isPlaying() const;
@@ -181,7 +183,7 @@ private:
     uint16_t lastTrackFinished{-1};
   typedef queue<uint8_t, maxTracksInFolder> track_queue;
 
-  SoftwareSerial       softwareSerial;
+  MySerial       softwareSerial;
   const Settings&      settings;
 
   uint8_t              volume{};
@@ -194,7 +196,7 @@ private:
   // mp3 queue
   uint16_t             mp3_track{};
   uint16_t             mp3_track_next{};
-  uint16_t             mp3_track_last{};
+  uint16_t             mp3_track_last{0};
 
   enum play_type: uint8_t {
     play_none,

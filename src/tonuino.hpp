@@ -9,6 +9,7 @@
 #include "chip_card_v3.hpp"
 #include "modifier.hpp"
 #include "loopModifier.h"
+#include "InputTrigger.h"
 #include "timer.hpp"
 
 enum class WakeupSource{
@@ -51,6 +52,7 @@ public:
   void setFolder(folderSettings *newFolder    ) { myFolder = newFolder; }
 
   void keepAwake();
+  void ResetKeepAwake();
   void executeSleep();
   void OnPlayFinished(uint16_t track);
 
@@ -61,6 +63,7 @@ public:
 
 private:
 
+  void internalLoop(WakeupSource source);
   void ReactOnWakeup(WakeupSource source);
   bool specialCard(const nfcTagObject &nfcTag);
   bool isKeepAwake();
@@ -74,16 +77,13 @@ private:
 //  Commands             commands            {settings, &buttons, &serialInput};
   Commands             commands            {settings, &buttons};
   Chip_card            chip_card           {mp3};
+  InputTrigger         triggerHandler{};
+
 
   friend class Base;
 
   Modifier             noneModifier        {*this, mp3, settings};
-  SleepTimer           sleepTimer          {*this, mp3, settings};
   FreezeDance          freezeDance         {*this, mp3, settings};
-  Locked               locked              {*this, mp3, settings};
-  ToddlerMode          toddlerMode         {*this, mp3, settings};
-  KindergardenMode     kindergardenMode    {*this, mp3, settings};
-  RepeatSingleModifier repeatSingleModifier{*this, mp3, settings};
 
   Modifier*            activeModifier      {&noneModifier};
 

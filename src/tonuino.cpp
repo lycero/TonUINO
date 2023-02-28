@@ -24,8 +24,8 @@ namespace
 
 	void SetupWatchDog(uint8_t time)
 	{
-		cli();
 		wdt_reset();
+		cli();
 		MCUSR &= ~(1 << WDRF);
 		WDTCSR = (1 << WDCE) | (1 << WDE);
 		WDTCSR = time;
@@ -42,9 +42,11 @@ void Tonuino::setup()
 	// load Settings from EEPROM
 	settings.loadSettingsFromFlash();
 
+#ifndef DISABLE_NFC
 	// NFC Leser initialisieren
 	delay(25);
 	chip_card.initCard();
+#endif // !DISABLE_NFC
 
 	digitalWrite(dfPlayer_powerPin, 1);
 	delay(25);
@@ -56,6 +58,8 @@ void Tonuino::setup()
 	mp3.setVolume();
 	mp3.setEq(static_cast<DfMp3_Eq>(settings.eq - 1));
 
+	LOG(init_log, s_debug, F("MP3 State:"), mp3.GetStatus());
+
 	// RESET --- ALLE DREI KNÖPFE BEIM STARTEN GEDRÜCKT HALTEN -> alle EINSTELLUNGEN werden gelöscht
 	if (buttons.isReset())
 	{
@@ -63,37 +67,27 @@ void Tonuino::setup()
 		settings.loadSettingsFromFlash();
 	}
 
-	//activeLoopModifier->Init();
 	ChangeLoopModifier(LoopModifier::LoopModifierId::Active);
 	SM_tonuino::start();
 	// Start Shortcut "at Startup" - e.g. Welcome Sound
 	SM_tonuino::dispatch(command_e(commandRaw::start));
 
+	//mp3.enqueueTrack(4, 4, 8);
 	//ChangeLoopModifier(LoopModifier::LoopModifierId::LightSleep);
 }
 
 void Tonuino::loop(WakeupSource source)
 {
-	ReactOnWakeup(source);
-
-	wdt_reset();
-	unsigned long start_cycle = millis();  
-
-	activeLoopModifier->Loop();
-
-	auto transition = activeLoopModifier->GetTransition();
-
-	if (transition != LoopModifier::LoopModifierId::None)
-		ChangeLoopModifier(transition);
-
-	if (isKeepAwake()) 
-	{
-		unsigned long stop_cycle = millis();
-		if (stop_cycle - start_cycle < cycleTime)
-			delay(cycleTime - (stop_cycle - start_cycle));
+	auto trigger = triggerHandler.GetEvent();
+	if (trigger == TriggerEvent::MP3) {
+		internalLoop(WakeupSource::Mp3BusyChange);
 	}
-
-	activeLoopModifier->EndCycle(start_cycle);
+	else if (trigger == TriggerEvent::Pause || trigger == TriggerEvent::Volume) {
+		internalLoop(WakeupSource::KeyInput);
+	}
+	else {
+		internalLoop(source);
+	}
 }
 
 void Tonuino::ChangeLoopModifier(LoopModifier::LoopModifierId id)
@@ -104,37 +98,44 @@ void Tonuino::ChangeLoopModifier(LoopModifier::LoopModifierId id)
 	if (activeModifier != &noneModifier && id != LoopModifier::LoopModifierId::Active)
 		return;
 
-	if (!SM_tonuino::is_in_state<Play>() && 
-		!SM_tonuino::is_in_state<Idle>() && 
-		!SM_tonuino::is_in_state<Pause>() && 
+	if (!SM_tonuino::is_in_state<Play>() &&
+		!SM_tonuino::is_in_state<Idle>() &&
+		!SM_tonuino::is_in_state<Pause>() &&
 		!SM_tonuino::is_in_state<StartPlay>() &&
 		id != LoopModifier::LoopModifierId::Active)
-		return;	
+		return;
 
 	LoopModifier::LoopModifier* newModifier = activeLoopModifier;
-	
+
 	switch (id)
 	{
-	case LoopModifier::LoopModifierId::None:
+	case LoopModifier::LoopModifierId::None: {
 		break;
-	case LoopModifier::LoopModifierId::Active:
+	}
+	case LoopModifier::LoopModifierId::Active: {
 		newModifier = &loopActive;
 		break;
-	case LoopModifier::LoopModifierId::KeyRead:
+	}
+	case LoopModifier::LoopModifierId::KeyRead: {
 		newModifier = &loopKeyRead;
 		break;
-	case LoopModifier::LoopModifierId::CardRead:
+	}
+	case LoopModifier::LoopModifierId::CardRead: {
 		newModifier = &loopCardRead;
 		break;
-	case LoopModifier::LoopModifierId::LightSleep:
+	}
+	case LoopModifier::LoopModifierId::LightSleep: {
 		newModifier = &loopLightSleep;
 		break;
-	case LoopModifier::LoopModifierId::DeepSleep:
+	}
+	case LoopModifier::LoopModifierId::DeepSleep: {
 		newModifier = &loopDeepSleep;
 		break;
-	case LoopModifier::LoopModifierId::VeryDeepSleep:
+	}
+	case LoopModifier::LoopModifierId::VeryDeepSleep: {
 		newModifier = &loopVeryDeepSleep;
 		break;
+	}
 	default:
 		break;
 	}
@@ -145,30 +146,37 @@ void Tonuino::ChangeLoopModifier(LoopModifier::LoopModifierId id)
 	activeLoopModifier->HandleModifierChange(id);
 	activeLoopModifier = newModifier;
 
-	if (loop_log::will_log(s_debug)) 
+	if (loop_log::will_log(s_debug))
 	{
 		switch (id)
 		{
-		case LoopModifier::LoopModifierId::None:
+		case LoopModifier::LoopModifierId::None: {
 			break;
-		case LoopModifier::LoopModifierId::Active:
-			LOG(loop_log, s_debug, F("# -> Active Loop"));
+		}
+		case LoopModifier::LoopModifierId::Active: {
+			LOG(loop_log, s_debug, F("# -> Active"));
 			break;
-		case LoopModifier::LoopModifierId::KeyRead:
-			LOG(loop_log, s_debug, F("# -> KeyRead Loop"));
+		}
+		case LoopModifier::LoopModifierId::KeyRead: {
+			LOG(loop_log, s_debug, F("# -> KeyRead"));
 			break;
-		case LoopModifier::LoopModifierId::CardRead:
-			LOG(loop_log, s_debug, F("# -> CardRead Loop"));
+		}
+		case LoopModifier::LoopModifierId::CardRead: {
+			LOG(loop_log, s_debug, F("# -> CardRead"));
 			break;
-		case LoopModifier::LoopModifierId::LightSleep:
-			LOG(loop_log, s_debug, F("# -> LightSleep Loop"));
+		}
+		case LoopModifier::LoopModifierId::LightSleep: {
+			LOG(loop_log, s_debug, F("# -> LightSleep"));
 			break;
-		case LoopModifier::LoopModifierId::DeepSleep:
-			LOG(loop_log, s_debug, F("# -> DeepSleep Loop"));
+		}
+		case LoopModifier::LoopModifierId::DeepSleep: {
+			LOG(loop_log, s_debug, F("# -> DeepSleep"));
 			break;
-		case LoopModifier::LoopModifierId::VeryDeepSleep:
-			LOG(loop_log, s_debug, F("# -> VeryDeepSleep Loop"));
+		}
+		case LoopModifier::LoopModifierId::VeryDeepSleep: {
+			LOG(loop_log, s_debug, F("# -> VeryDeepSleep"));
 			break;
+		}
 		default:
 			break;
 		}
@@ -184,9 +192,11 @@ void Tonuino::runActiveLoop()
 
 	SM_tonuino::dispatch(command_e(commands.getCommandRaw()));
 
+#ifndef DISABLE_NFC
 	chip_card.wakeCard();
 	SM_tonuino::dispatch(card_e(chip_card.getCardEvent()));
 	chip_card.sleepCard();
+#endif // !DISABLE_NFC
 
 	mp3.loop();
 	activeModifier->loop();
@@ -304,16 +314,20 @@ void Tonuino::previousTrack()
 	mp3.playPrevious();
 }
 
-void Tonuino::resetActiveModifier() 
-{ 
+void Tonuino::resetActiveModifier()
+{
 	activeModifier = &noneModifier;
 	ChangeLoopModifier(LoopModifier::LoopModifierId::Active);
 }
 
-void Tonuino::keepAwake() 
+void Tonuino::keepAwake()
 {
-	wdt_reset();
 	myKeepAwake++;
+}
+
+void Tonuino::ResetKeepAwake()
+{
+	myKeepAwake = 0;
 }
 
 void Tonuino::OnPlayFinished(uint16_t track)
@@ -337,37 +351,11 @@ bool Tonuino::specialCard(const nfcTagObject& nfcTag)
 
 	switch (nfcTag.nfcFolderSettings.mode)
 	{
-	case mode_t::sleep_timer:
-		LOG(card_log, s_info, F("act. sleepTimer"));
-		mp3.playAdvertisement(advertTracks::t_302_sleep, false /*olnyIfIsPlaying*/);
-		activeModifier = &sleepTimer;
-		sleepTimer.start(nfcTag.nfcFolderSettings.special);
-		break;
 	case mode_t::freeze_dance:
 		LOG(card_log, s_info, F("act. freezeDance"));
 		mp3.playAdvertisement(advertTracks::t_300_freeze_into, false /*olnyIfIsPlaying*/);
 		activeModifier = &freezeDance;
 		;
-		break;
-	case mode_t::locked:
-		LOG(card_log, s_info, F("act. locked"));
-		mp3.playAdvertisement(advertTracks::t_303_locked, false /*olnyIfIsPlaying*/);
-		activeModifier = &locked;
-		break;
-	case mode_t::toddler:
-		LOG(card_log, s_info, F("act. toddlerMode"));
-		mp3.playAdvertisement(advertTracks::t_304_buttonslocked, false /*olnyIfIsPlaying*/);
-		activeModifier = &toddlerMode;
-		break;
-	case mode_t::kindergarden:
-		LOG(card_log, s_info, F("act. kindergardenMode"));
-		mp3.playAdvertisement(advertTracks::t_305_kindergarden, false /*olnyIfIsPlaying*/);
-		activeModifier = &kindergardenMode;
-		break;
-	case mode_t::repeat_single:
-		LOG(card_log, s_info, F("act. repeatSingleModifier"));
-		mp3.playAdvertisement(advertTracks::t_260_activate_mod_card, false /*olnyIfIsPlaying*/);
-		activeModifier = &repeatSingleModifier;
 		break;
 	default:
 		return false;
@@ -378,14 +366,41 @@ bool Tonuino::specialCard(const nfcTagObject& nfcTag)
 }
 
 
+void Tonuino::internalLoop(WakeupSource source)
+{
+	triggerHandler.stop();
+	ReactOnWakeup(source);
+
+	wdt_reset();
+	unsigned long start_cycle = millis();
+
+	activeLoopModifier->Loop();
+
+	auto transition = activeLoopModifier->GetTransition();
+
+	if (transition != LoopModifier::LoopModifierId::None)
+		ChangeLoopModifier(transition);
+
+	if (isKeepAwake())
+	{
+		unsigned long stop_cycle = millis();
+		if (stop_cycle - start_cycle < cycleTime)
+			delay(cycleTime - (stop_cycle - start_cycle));
+		return;
+	}
+
+	activeLoopModifier->EndCycle(start_cycle);	
+}
+
 void Tonuino::ReactOnWakeup(WakeupSource source)
 {
+	//delay(10);
 	wdt_reset();
 	switch (source)
 	{
 	case WakeupSource::None:
 	{
-		/* code */		
+		/* code */
 		break;
 	}
 	case WakeupSource::Watchdog:
@@ -397,6 +412,7 @@ void Tonuino::ReactOnWakeup(WakeupSource source)
 	}
 	case WakeupSource::KeyInput:
 	{
+		LOG(loop_log, s_info, F("KI"));
 		//commands.getCommandRaw();
 		ChangeLoopModifier(LoopModifier::LoopModifierId::KeyRead);
 		break;
@@ -404,6 +420,7 @@ void Tonuino::ReactOnWakeup(WakeupSource source)
 
 	case WakeupSource::Mp3BusyChange:
 	{
+		LOG(loop_log, s_info, F("Mp3BC"));
 		myKeepAwake++;
 		if (!SM_tonuino::is_in_state<Play>())
 			break;
@@ -415,7 +432,7 @@ void Tonuino::ReactOnWakeup(WakeupSource source)
 			break;
 
 		mp3.OnPlayFinished(mp3.getLastPlayedTrack());
-				
+
 		break;
 	}
 	default:
@@ -425,7 +442,7 @@ void Tonuino::ReactOnWakeup(WakeupSource source)
 
 bool Tonuino::isKeepAwake()
 {
-	if (myKeepAwake) 
+	if (myKeepAwake)
 	{
 		myKeepAwake--;
 		return true;
@@ -464,20 +481,37 @@ unsigned long Tonuino::getWatchDogMillis(uint8_t time)
 void Tonuino::executeSleep()
 {
 	wdt_reset();
-	mp3.SerialStopListening();
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 	cli();
 	sleep_enable();
+	// Disable digital input buffers on all ADC0-ADC5 pins
+	DIDR0 = 0x3F;
+	// set I2C pin as input no pull up
+	// this prevent current draw on I2C pins that
+	// completly destroy our low power mode
+
+	//Disable I2C interface so we can control the SDA and SCL pins directly
+	TWCR &= ~(_BV(TWEN));
+
+	// disable I2C module this allow us to control
+	// SCA/SCL pins and reinitialize the I2C bus at wake up
+	TWCR = 0;
+	pinMode(SDA, INPUT);
+	pinMode(SCL, INPUT);
+	digitalWrite(SDA, LOW);
+	digitalWrite(SCL, LOW);
+
 	power_adc_disable();
 	power_usart0_disable();
 	power_spi_disable();
 	power_timer0_disable();
 	power_timer1_disable();
 	power_timer2_disable();
-	power_twi_disable();
+	//power_twi_disable();
+	triggerHandler.begin();
 	sei();
 	sleep_cpu();
 	sleep_disable();
+	power_twi_enable();
 	power_all_enable();
-	mp3.SerialStartListening();
 }

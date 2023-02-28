@@ -21,9 +21,6 @@
     <ClInclude Include="src\queue.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\serial_input.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\settings.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -48,9 +45,6 @@
     <ClInclude Include="src\buttons.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\ChangeCounter.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\chip_card_v3.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -69,18 +63,6 @@
     <ClInclude Include="src\modifier.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\PinChangeInterruptHandler\PinChangeInterruptBoards.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PinChangeInterruptHandler\PinChangeInterruptHandler.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PN532\PN532_HSU.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PN532\PN532_SWHSU.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\PN532\PN532Interface.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -90,10 +72,25 @@
     <ClInclude Include="src\PN532\PN532_debug.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\SoftwareSerialLight\SoftwareSerialLight.h">
+    <ClInclude Include="src\loopModifier.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\loopModifier.h">
+    <ClInclude Include="src\AltSoftSerial.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\config\AltSoftSerial_Timers.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\config\AltSoftSerial_Boards.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InputTrigger.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PN532\PN532_I2C.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PN532\PN532_HSU.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
@@ -105,9 +102,6 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\mp3.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serial_input.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\settings.cpp">
@@ -125,31 +119,28 @@
     <ClCompile Include="src\buttons.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="src\ChangeCounter.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="src\chip_card_v3.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\commands.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="src\PinChangeInterruptHandler\PinChangeInterruptHandler.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PN532\PN532_HSU.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PN532\PN532_SWHSU.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="src\PN532\PN532.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="src\SoftwareSerialLight\SoftwareSerialLight.cpp">
+    <ClCompile Include="src\loopModifier.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="src\loopModifier.cpp">
+    <ClCompile Include="src\AltSoftSerial.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InputTrigger.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PN532\PN532_I2C.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PN532\PN532_HSU.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

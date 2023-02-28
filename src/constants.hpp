@@ -20,7 +20,9 @@ inline constexpr int getLevel(levelType t, level l) {
 		: (t == levelType::activeHigh ? HIGH : LOW);
 }
 
-#define TESTBOARD
+//#define TESTBOARD
+//#define DISABLE_NFC
+
 
 // ####### buttons #####################################
 
@@ -29,10 +31,10 @@ inline constexpr int getLevel(levelType t, level l) {
 
 inline constexpr uint32_t buttonLongPress = 1000; // timeout for long press button in ms
 #ifndef TESTBOARD
-inline constexpr uint8_t  buttonPausePin = 10;
-inline constexpr uint8_t  buttonUpPin = 11;
-inline constexpr uint8_t  buttonDownPin = 12;
-inline constexpr uint8_t  resetPin = 6;
+inline constexpr uint8_t  buttonPausePin = 6;
+inline constexpr uint8_t  buttonUpPin = 5;
+inline constexpr uint8_t  buttonDownPin = 4;
+inline constexpr uint8_t  resetPin = A0;
 #else
 inline constexpr uint8_t  buttonPausePin = 62;
 inline constexpr uint8_t  buttonUpPin = 64;
@@ -45,7 +47,7 @@ inline constexpr uint8_t  buttonFourPin = A3;
 inline constexpr uint8_t  buttonFivePin = A4;
 #endif
 
-inline constexpr levelType buttonPinType = levelType::activeHigh;
+inline constexpr levelType buttonPinType = levelType::activeLow;
 inline constexpr uint32_t  buttonDbTime = 25; // Debounce time in milliseconds (default 25ms)
 
 // ####### chip_card ###################################
@@ -56,13 +58,13 @@ inline constexpr uint8_t  cardRemoveDelay = 1;
 inline constexpr unsigned long cardSleep = 1000;
 
 // ####### mp3 #########################################
-inline constexpr uint8_t       maxTracksInFolder = 255;
+inline constexpr uint8_t       maxTracksInFolder = 100;
 #ifndef TESTBOARD
-inline constexpr uint8_t       dfPlayer_receivePin = A1;
-inline constexpr uint8_t       dfPlayer_transmitPin = A0;
-inline constexpr uint8_t       dfPlayer_busyPin = 9;
-inline constexpr uint8_t       dfPlayer_ampPin = 4;
-inline constexpr uint8_t       dfPlayer_powerPin = 5;
+inline constexpr uint8_t       dfPlayer_receivePin = 8;
+inline constexpr uint8_t       dfPlayer_transmitPin = 9;
+inline constexpr uint8_t       dfPlayer_busyPin = 7;
+inline constexpr uint8_t       dfPlayer_ampPin = 11;
+inline constexpr uint8_t       dfPlayer_powerPin = 12;
 #else
 inline constexpr uint8_t       dfPlayer_receivePin = 51;
 inline constexpr uint8_t       dfPlayer_transmitPin = 50;
@@ -75,7 +77,7 @@ inline constexpr unsigned long dfPlayer_timeUntilStarts = 3000;
 
 
 // ####### tonuino #####################################
-inline constexpr unsigned long baseTimeMulti = 10;
+inline constexpr unsigned long baseTimeMulti = 1000;
 inline constexpr uint8_t openAnalogPin = A7;
 inline constexpr unsigned long cycleTime = 50;
 inline constexpr uint8_t sleepCycleTime = WDTO_2S;

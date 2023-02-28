@@ -4,7 +4,8 @@
 #include <stdint.h>
 
 #include "PN532/PN532.h"
-#include "PN532/PN532_HSU.h"
+//#include "PN532/PN532_HSU.h"
+#include "PN532/PN532_I2C.h"
 
 #include "constants.hpp"
 
@@ -93,7 +94,8 @@ public:
 private:
   Mp3                 &mp3;
   
-  PN532_HSU           pn532hsu;
+  //PN532_HSU          pn532hsu;
+  PN532_I2C          pn532Serial;
   PN532               pn532;
 
   delayedSwitchOn     cardRemovedSwitch;

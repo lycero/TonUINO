@@ -83,9 +83,11 @@ void CardRead::Loop()
 	if (!cardSleepTimer.isExpired())
 			return;
 
+#ifndef DISABLE_NFC
 	card.wakeCard();
 	SM_tonuino::dispatch(card_e(card.getCardEvent()));
 	card.sleepCard();
+#endif // !DISABLE_NFC
 
 	cardSleepTimer.start(cardSleep);
 }
