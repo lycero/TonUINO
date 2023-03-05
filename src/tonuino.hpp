@@ -87,12 +87,13 @@ private:
 
   Modifier*            activeModifier      {&noneModifier};
 
-  LoopModifier::Active loopActive{ *this, mp3, settings };
-  LoopModifier::KeyRead loopKeyRead{ *this, commands, settings };
-  LoopModifier::CardRead loopCardRead{ *this, chip_card, settings };
-  LoopModifier::LightSleep loopLightSleep{ *this, mp3, settings };
-  LoopModifier::DeepSleep loopDeepSleep{ *this, mp3, settings };
-  LoopModifier::VeryDeepSleep loopVeryDeepSleep{ *this, mp3, settings };
+  LoopModifier::Active loopActive{ *this, mp3 };
+  LoopModifier::KeyRead loopKeyRead{ *this, commands };
+  LoopModifier::CardRead loopCardRead{ *this, chip_card, mp3 };
+  LoopModifier::BeginPlay loopBeginPlay{ *this, mp3 };
+  LoopModifier::LightSleep loopLightSleep{ *this, mp3 };
+  LoopModifier::DeepSleep loopDeepSleep{ *this, mp3 };
+  LoopModifier::VeryDeepSleep loopVeryDeepSleep{ *this, mp3 };
 
   LoopModifier::LoopModifier* activeLoopModifier{&loopActive};
 

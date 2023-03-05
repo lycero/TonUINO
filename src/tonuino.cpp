@@ -124,6 +124,10 @@ void Tonuino::ChangeLoopModifier(LoopModifier::LoopModifierId id)
 		newModifier = &loopCardRead;
 		break;
 	}
+	case LoopModifier::LoopModifierId::BeginPlay: {
+		newModifier = &loopBeginPlay;
+		break;
+	}
 	case LoopModifier::LoopModifierId::LightSleep: {
 		newModifier = &loopLightSleep;
 		break;
@@ -163,6 +167,10 @@ void Tonuino::ChangeLoopModifier(LoopModifier::LoopModifierId id)
 		}
 		case LoopModifier::LoopModifierId::CardRead: {
 			LOG(loop_log, s_debug, F("# -> CardRead"));
+			break;
+		}
+		case LoopModifier::LoopModifierId::BeginPlay: {
+			LOG(loop_log, s_debug, F("# -> BeginPlay"));
 			break;
 		}
 		case LoopModifier::LoopModifierId::LightSleep: {
@@ -420,11 +428,11 @@ void Tonuino::ReactOnWakeup(WakeupSource source)
 	{
 		LOG(loop_log, s_info, F("Mp3BC"));
 		myKeepAwake++;
-		if (!SM_tonuino::is_in_state<Play>())
-			break;
+		//if (!SM_tonuino::is_in_state<Play>())
+		//	break;
 
-		if (!(mp3.isPlayingFolder() || mp3.isPlayingMp3()) || mp3.isPlaying())
-			break;
+		//if (!(mp3.isPlayingFolder() || mp3.isPlayingMp3()) || mp3.isPlaying())
+		//	break;
 
 		if (activeLoopModifier->GetModifierId() == LoopModifier::LoopModifierId::KeyRead)
 			break;

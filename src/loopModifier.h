@@ -19,6 +19,7 @@ namespace LoopModifier {
 		Active,
 		KeyRead,
 		CardRead,
+		BeginPlay,
 		LightSleep,
 		DeepSleep,
 		VeryDeepSleep
@@ -26,7 +27,7 @@ namespace LoopModifier {
 
 	class LoopModifier {
 	public:
-		LoopModifier(Tonuino& tonuino, const Settings& settings) : tonuino(tonuino), settings(settings) {}
+		LoopModifier(Tonuino& tonuino) : tonuino(tonuino) {}
 		virtual void Loop() {}
 		virtual LoopModifierId GetTransition() { return LoopModifierId::None; }
 		virtual LoopModifierId GetModifierId() = 0;
@@ -37,23 +38,19 @@ namespace LoopModifier {
 		LoopModifier& operator=(const LoopModifier&) = delete;
 	protected:
 		Tonuino& tonuino;
-		const Settings& settings;
 	};
 
 	class Active : public LoopModifier {
 	public:
-		Active(Tonuino& tonuino, Mp3& mp3, const Settings& settings) : LoopModifier(tonuino, settings), instance(tonuino) {}
+		Active(Tonuino& tonuino, Mp3& mp3) : LoopModifier(tonuino) {}
 		LoopModifierId GetModifierId() final { return LoopModifierId::Active; }
 		void Loop() final;
 		void EndCycle(unsigned long startCycle) final;
-
-	private:
-		Tonuino& instance;
 	};
 
 	class KeyRead : public LoopModifier {
 	public:
-		KeyRead(Tonuino& tonuino, Commands& commands, const Settings& settings) : LoopModifier(tonuino, settings), commands(commands) {}
+		KeyRead(Tonuino& tonuino, Commands& commands) : LoopModifier(tonuino), commands(commands) {}
 		void Init() final;
 		LoopModifierId GetModifierId() final { return LoopModifierId::KeyRead; }
 		void Loop() final;
@@ -68,7 +65,7 @@ namespace LoopModifier {
 
 	class CardRead : public LoopModifier {
 	public:
-		CardRead(Tonuino& tonuino, Chip_card& card, const Settings& settings) : LoopModifier(tonuino, settings), card(card) {}
+		CardRead(Tonuino& tonuino, Chip_card& card, Mp3& mp3) : LoopModifier(tonuino), card(card), mp3(mp3) {}
 		LoopModifierId GetModifierId() final { return LoopModifierId::CardRead; }
 		void Init() final;
 		void Loop() final;
@@ -76,13 +73,25 @@ namespace LoopModifier {
 		LoopModifierId GetTransition() final;
 		void EndCycle(unsigned long startCycle) final;
 	private:
+		Mp3& mp3;
 		Chip_card& card;
 		Timer cardSleepTimer{};
 	};
 
+	class BeginPlay : public LoopModifier {
+	public:
+		BeginPlay(Tonuino& tonuino, Mp3& mp3) : LoopModifier(tonuino), mp3(mp3) {}
+		LoopModifierId GetModifierId() final { return LoopModifierId::BeginPlay; }
+		void Loop() final;
+		LoopModifierId GetTransition() final;
+		void EndCycle(unsigned long startCycle) final;
+	private:
+		Mp3& mp3;
+	};
+
 	class LightSleep : public LoopModifier {
 	public:
-		LightSleep(Tonuino& tonuino, Mp3& mp3, const Settings& settings) : LoopModifier(tonuino, settings), mp3(mp3) {}
+		LightSleep(Tonuino& tonuino, Mp3& mp3) : LoopModifier(tonuino), mp3(mp3) {}
 		LoopModifierId GetModifierId() final { return LoopModifierId::LightSleep; }
 		void Init() final;
 		void Loop() final;
@@ -95,7 +104,7 @@ namespace LoopModifier {
 
 	class DeepSleep : public LoopModifier {
 	public:
-		DeepSleep(Tonuino& tonuino, Mp3& mp3, const Settings& settings) : LoopModifier(tonuino, settings), mp3(mp3) {}
+		DeepSleep(Tonuino& tonuino, Mp3& mp3) : LoopModifier(tonuino), mp3(mp3) {}
 		LoopModifierId GetModifierId() final { return LoopModifierId::DeepSleep; }
 		void Init() final;
 		void Loop() final;
@@ -109,7 +118,7 @@ namespace LoopModifier {
 
 	class VeryDeepSleep : public LoopModifier {
 	public:
-		VeryDeepSleep(Tonuino& tonuino, Mp3& mp3, const Settings& settings) : LoopModifier(tonuino, settings), mp3(mp3) {}
+		VeryDeepSleep(Tonuino& tonuino, Mp3& mp3) : LoopModifier(tonuino), mp3(mp3) {}
 		LoopModifierId GetModifierId() final { return LoopModifierId::VeryDeepSleep; }
 		void Init() final;
 		void Loop() final;

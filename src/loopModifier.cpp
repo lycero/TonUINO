@@ -13,7 +13,7 @@ Timer _delayTimer{};
 // Active
 void Active::Loop()
 {
-	instance.runActiveLoop();
+	tonuino.runActiveLoop();
 }
 
 void Active::EndCycle(unsigned long startCycle)
@@ -80,7 +80,10 @@ void CardRead::Init()
 
 void CardRead::Loop()
 {
+	mp3.loop();
+
 	SM_tonuino::dispatch(command_e(commandRaw::none));
+
 	if (!cardSleepTimer.isExpired())
 			return;
 
@@ -101,8 +104,8 @@ void CardRead::UpdateTimer(unsigned long timeout)
 
 LoopModifierId CardRead::GetTransition()
 {
-	if (SM_tonuino::is_in_state<Play>())
-		return LoopModifierId::LightSleep;
+	if (SM_tonuino::is_in_state<StartPlay>())
+		return LoopModifierId::BeginPlay;
 
 	if (_delayTimer.isExpired())
 		return LoopModifierId::DeepSleep;
@@ -211,4 +214,28 @@ void VeryDeepSleep::HandleModifierChange(LoopModifierId newModifier)
 void VeryDeepSleep::EndCycle(unsigned long startCycle)
 {
 	tonuino.executeSleep();
+}
+
+// BeginPlay
+
+void BeginPlay::Loop()
+{
+	mp3.loop();
+
+	SM_tonuino::dispatch(command_e(commandRaw::none));
+}
+
+LoopModifierId BeginPlay::GetTransition()
+{
+	if (SM_tonuino::is_in_state<Play>())
+		return LoopModifierId::LightSleep;
+
+	return LoopModifierId::None;
+}
+
+void BeginPlay::EndCycle(unsigned long startCycle)
+{
+	unsigned long stop_cycle = millis();
+	if (stop_cycle - startCycle < cycleTime)
+		delay(cycleTime - (stop_cycle - startCycle));
 }
