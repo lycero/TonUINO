@@ -73,7 +73,7 @@ void Tonuino::setup()
 	SM_tonuino::dispatch(command_e(commandRaw::start));
 
 	//mp3.enqueueTrack(4, 4, 8);
-	//ChangeLoopModifier(LoopModifier::LoopModifierId::LightSleep);
+	ChangeLoopModifier(LoopModifier::LoopModifierId::CardRead);
 }
 
 void Tonuino::loop(WakeupSource source)
@@ -190,6 +190,9 @@ void Tonuino::runActiveLoop()
 {
 	unsigned long start_cycle = millis();
 
+	mp3.loop();
+	activeModifier->loop();
+
 	SM_tonuino::dispatch(command_e(commands.getCommandRaw()));
 
 #ifndef DISABLE_NFC
@@ -197,9 +200,6 @@ void Tonuino::runActiveLoop()
 	SM_tonuino::dispatch(card_e(chip_card.getCardEvent()));
 	chip_card.sleepCard();
 #endif // !DISABLE_NFC
-
-	mp3.loop();
-	activeModifier->loop();
 
 	unsigned long stop_cycle = millis();
 	if (stop_cycle - start_cycle < cycleTime)
@@ -368,7 +368,6 @@ bool Tonuino::specialCard(const nfcTagObject& nfcTag)
 
 void Tonuino::internalLoop(WakeupSource source)
 {
-	triggerHandler.stop();
 	ReactOnWakeup(source);
 
 	wdt_reset();
@@ -388,7 +387,6 @@ void Tonuino::internalLoop(WakeupSource source)
 			delay(cycleTime - (stop_cycle - start_cycle));
 		return;
 	}
-
 	activeLoopModifier->EndCycle(start_cycle);	
 }
 
@@ -500,7 +498,7 @@ void Tonuino::executeSleep()
 	pinMode(SCL, INPUT);
 	digitalWrite(SDA, LOW);
 	digitalWrite(SCL, LOW);
-
+	mp3.SerialStopListening();
 	power_adc_disable();
 	power_usart0_disable();
 	power_spi_disable();
@@ -514,4 +512,6 @@ void Tonuino::executeSleep()
 	sleep_disable();
 	power_twi_enable();
 	power_all_enable();
+	triggerHandler.stop();
+	mp3.SerialStartListening();
 }

@@ -80,6 +80,7 @@ void CardRead::Init()
 
 void CardRead::Loop()
 {
+	SM_tonuino::dispatch(command_e(commandRaw::none));
 	if (!cardSleepTimer.isExpired())
 			return;
 
@@ -122,8 +123,8 @@ void LightSleep::Init()
 
 void LightSleep::Loop()
 {
-	SM_tonuino::dispatch(command_e(commandRaw::none));
 	mp3.loop();
+	SM_tonuino::dispatch(command_e(commandRaw::none));
 	if (mp3.isPlaying())
 		_delayTimer.start(lightSleepTimerDuration);
 }
@@ -140,8 +141,11 @@ LoopModifierId LightSleep::GetTransition()
 	return LoopModifierId::None;
 }
 
-void LightSleep::EndCycle(unsigned long startCycle)
+void LightSleep::EndCycle(unsigned long start_cycle)
 {
+	unsigned long stop_cycle = millis();
+	if (stop_cycle - start_cycle < cycleTime)
+		delay(cycleTime - (stop_cycle - start_cycle));
 	tonuino.executeSleep();
 }
 

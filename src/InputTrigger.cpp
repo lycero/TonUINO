@@ -2,51 +2,36 @@
 #include "constants.hpp"
 #include "tonuino.hpp"
 
+#define INITAL_STATE B1111
+
 int8_t digitalPinToPCINT(int8_t p) {
 	return digitalPinToPCICR(p) ? ((8 * digitalPinToPCICRbit(p)) + digitalPinToPCMSKbit(p)) : NOT_AN_INTERRUPT;
 }
 
-InputTrigger::InputTrigger() : _state(1)
+InputTrigger::InputTrigger() : _state(INITAL_STATE)
 {
 }
 
 void InputTrigger::begin()
 {
-	//pinMode(dfPlayer_busyPin, INPUT_PULLUP);
-	//digitalWrite(dfPlayer_busyPin, 1);
-	//pinMode(buttonPausePin, INPUT);
-	//pinMode(buttonUpPin, INPUT);
-	//pinMode(buttonDownPin, INPUT);
-	 
-	//digitalWrite(buttonPausePin, 0); 
-	//digitalWrite(buttonUpPin, 0);
-	//digitalWrite(buttonDownPin, 0);
-
 	PCICR |= B00000100;// enable interrupt for the group
 	PCMSK2 |= B11110000;
+	//_state = INITAL_STATE;
+	//get current state
+	TriggerOnHigh(dfPlayer_busyPin, B0001);
+	TriggerOnLow(buttonPausePin, B0010);
+	//TriggerOnLow(buttonUpPin, B0100);
+	//TriggerOnLow(buttonDownPin, B1000);
 }
 
 void InputTrigger::stop()
 {
-	//byte pcIntNum = digitalPinToPCINT(buttonPausePin);
-	//byte port = pcIntNum / 8;
-	//byte bits = 0x01111000;
-	//noInterrupts();
-
-	//// Disable pins
-	//portToPCMSK(port) &= ~(bits);
-	//PCICR &= ~(1 << portToPCICRbit(port));
-
-	//interrupts();
-
 	PCICR &= ~B00000100;// disable interrupt for the group
-	//PCMSK2 = B00000000;
-
 }
 
 TriggerEvent InputTrigger::GetEvent()
 {
-	if (TriggerOnLow(dfPlayer_busyPin, B0001))
+	if (TriggerOnHigh(dfPlayer_busyPin, B0001))
 		return TriggerEvent::MP3;
 
 	if (TriggerOnLow(buttonPausePin, B0010))
@@ -99,22 +84,6 @@ bool InputTrigger::TriggerOnLow(uint8_t pin, int stateMask)
 ISR(PCINT2_vect)
 {
 }
-//#if defined(PCINT0_vect)
-//    ISR(PCINT0_vect) { changeInterrupt(0, PCINT_INPUT_PORT0); }
-//#endif
-//#if defined(PCINT1_vect)
-//ISR(PCINT1_vect) {
-//	Serial.println("PCI1");
-//}
-//#endif
-//#if defined(PCINT2_vect)
-//ISR(PCINT2_vect) {
-//	Serial.println("PCI2");
-//}
-//#endif
-//#if defined(PCINT3_vect)
-//ISR(PCINT3_vect) { changeInterrupt(3, PCINT_INPUT_PORT3); }
-//#endif
 #else
 // #if defined(PCINT0_vect)
 //   ISR(PCINT0_vect) { changeInterrupt(0, PCINT_INPUT_PORT0); }

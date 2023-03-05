@@ -221,11 +221,16 @@ uint16_t Mp3::GetStatus()
 
 void Mp3::SerialStopListening()
 {
+    while (softwareSerial.available())
+        softwareSerial.read();
+    softwareSerial.flush();
+    softwareSerial.end();
 }
 
 void Mp3::SerialStartListening()
 {
-    softwareSerial.listen();
+    softwareSerial.clearWriteError();
+    begin();
 }
 
 void Mp3::increaseVolume() {

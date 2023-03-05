@@ -2,6 +2,7 @@
 #define SRC_MP3_HPP_
 
 #include <Arduino.h>
+//#define DfMiniMp3Debug Serial
 #include <DFMiniMp3.h>
 #include "AltSoftSerial.h"
 
@@ -10,7 +11,6 @@
 #include "timer.hpp"
 
 #define CHECK_MISSING_ONPLAYFINISHED
-#define DfMiniMp3Debug
 enum class mp3Tracks: uint16_t {
   t_0                          =   0,
   t_262_pling                  = 262,
