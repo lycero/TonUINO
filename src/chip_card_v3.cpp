@@ -123,12 +123,12 @@ bool Chip_card::writeCard(const nfcTagObject &nfcTag) {
   return true;
 }
 
-void Chip_card::sleepCard() {
+void Chip_card::disableRFField() {
     pn532.setRFField( 0x00, 0x00);  
     //pn532.shutPowerDown(); 
 }
 
-void Chip_card::wakeCard() {
+void Chip_card::enableRFField() {
     //pn532.wakeup();
     pn532.setRFField( 0x02, 0x01);
 }
@@ -140,15 +140,11 @@ void Chip_card::initCard()
   if (!versiondata)
   {      
     LOG(card_log, s_debug, F("Didn't Find PN53x Module"));    
-    digitalWrite(resetPin, LOW);
-    while (1);
     return;
   }
 
   LOG(card_log, s_debug, F("Found chip PN532") );
   LOG(card_log, s_debug, F("Firmware ver. ") , (versiondata >> 16) & 0xFF,  F("."), (versiondata >> 8) & 0xFF);
-
-  delay(250);
 
   // Configure board to read RFID tags
   pn532.SAMConfig();

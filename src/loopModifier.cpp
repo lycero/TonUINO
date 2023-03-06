@@ -75,7 +75,11 @@ void KeyRead::EndCycle(unsigned long startCycle)
 // CardRead
 void CardRead::Init()
 {
+	tonuino.SetSleepTimeout(cardReadSleepTime);
 	_delayTimer.start(cardReadTimerDuration);
+	//TODO change watchdog to 1s
+	digitalWrite(cardPowerDownPin, HIGH);
+	card.initCard();
 }
 
 void CardRead::Loop()
@@ -88,9 +92,9 @@ void CardRead::Loop()
 			return;
 
 #ifndef DISABLE_NFC
-	card.wakeCard();
+	card.enableRFField();
 	SM_tonuino::dispatch(card_e(card.getCardEvent()));
-	card.sleepCard();
+	card.disableRFField();
 #endif // !DISABLE_NFC
 
 	cardSleepTimer.start(cardSleep);
@@ -100,6 +104,11 @@ void CardRead::UpdateTimer(unsigned long timeout)
 {
 	cardSleepTimer.updateMillis(timeout);
 	_delayTimer.updateMillis(timeout);
+}
+
+void CardRead::HandleModifierChange(LoopModifierId newModifier)
+{
+	digitalWrite(cardPowerDownPin, LOW);
 }
 
 LoopModifierId CardRead::GetTransition()
@@ -122,6 +131,7 @@ void CardRead::EndCycle(unsigned long startCycle)
 void LightSleep::Init()
 {
 	_delayTimer.start(lightSleepTimerDuration);
+	tonuino.SetSleepTimeout(sleepCycleTime);
 }
 
 void LightSleep::Loop()
@@ -154,9 +164,10 @@ void LightSleep::EndCycle(unsigned long start_cycle)
 
 //DeepSleep
 void DeepSleep::Init()
-{
-	_delayTimer.start(deepSleepTimerDuration);
+{	
 	digitalWrite(dfPlayer_ampPin, 1);
+	tonuino.SetSleepTimeout(deepSleepCycleTime);
+	_delayTimer.start(deepSleepTimerDuration);
 }
 
 void DeepSleep::Loop()
@@ -194,6 +205,8 @@ void DeepSleep::EndCycle(unsigned long startCycle)
 void VeryDeepSleep::Init()
 {
 	mp3.goSleep();
+	delay(200);
+	digitalWrite(dfPlayer_powerPin, 0);
 }
 
 void VeryDeepSleep::Loop()

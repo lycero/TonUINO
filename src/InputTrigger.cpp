@@ -20,8 +20,8 @@ void InputTrigger::begin()
 	//get current state
 	TriggerOnHigh(dfPlayer_busyPin, B0001);
 	TriggerOnLow(buttonPausePin, B0010);
-	//TriggerOnLow(buttonUpPin, B0100);
-	//TriggerOnLow(buttonDownPin, B1000);
+	TriggerOnLow(buttonUpPin, B0100);
+	TriggerOnLow(buttonDownPin, B1000);
 }
 
 void InputTrigger::stop()
@@ -37,11 +37,11 @@ TriggerEvent InputTrigger::GetEvent()
 	if (TriggerOnLow(buttonPausePin, B0010))
 		return TriggerEvent::Pause;
 
-	//if (TriggerOnLow(buttonUpPin, B0100))
-	//	return TriggerEvent::Volume;
+	if (TriggerOnLow(buttonUpPin, B0100))
+		return TriggerEvent::Volume;
 
-	//if (TriggerOnLow(buttonDownPin, B1000))
-	//	return TriggerEvent::Volume;
+	if (TriggerOnLow(buttonDownPin, B1000))
+		return TriggerEvent::Volume;
 
 	return TriggerEvent::None;
 }

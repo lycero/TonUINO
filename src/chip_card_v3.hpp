@@ -85,8 +85,8 @@ public:
   Chip_card(Mp3 &mp3);
   bool readCard (      nfcTagObject &nfcTag);
   bool writeCard(const nfcTagObject &nfcTag);
-  void sleepCard();
-  void wakeCard();
+  void disableRFField();
+  void enableRFField();
   void initCard ();
   cardEvent getCardEvent();
   bool isCardRemoved() { return cardRemoved; }

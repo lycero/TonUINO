@@ -15,38 +15,16 @@
 
 namespace
 {
-
 	const __FlashStringHelper* str_bis() { return F(" bis "); }
-
-	void ChangeWatchDog(uint8_t time)
-	{
-	}
-
-	void SetupWatchDog(uint8_t time)
-	{
-		wdt_reset();
-		cli();
-		MCUSR &= ~(1 << WDRF);
-		WDTCSR = (1 << WDCE) | (1 << WDE);
-		WDTCSR = time;
-		WDTCSR |= 1 << WDIE | (0 << WDE);
-		sei();
-	}
 
 } // anonymous namespace
 
 void Tonuino::setup()
 {
-	SetupWatchDog(sleepCycleTime);
+	SetSleepTimeout(sleepCycleTime);
 
 	// load Settings from EEPROM
 	settings.loadSettingsFromFlash();
-
-#ifndef DISABLE_NFC
-	// NFC Leser initialisieren
-	delay(25);
-	chip_card.initCard();
-#endif // !DISABLE_NFC
 
 	digitalWrite(dfPlayer_powerPin, 1);
 	delay(25);
@@ -67,12 +45,11 @@ void Tonuino::setup()
 		settings.loadSettingsFromFlash();
 	}
 
-	ChangeLoopModifier(LoopModifier::LoopModifierId::Active);
+	//ChangeLoopModifier(LoopModifier::LoopModifierId::Active);
 	SM_tonuino::start();
 	// Start Shortcut "at Startup" - e.g. Welcome Sound
 	SM_tonuino::dispatch(command_e(commandRaw::start));
 
-	//mp3.enqueueTrack(4, 4, 8);
 	ChangeLoopModifier(LoopModifier::LoopModifierId::CardRead);
 }
 
@@ -204,9 +181,9 @@ void Tonuino::runActiveLoop()
 	SM_tonuino::dispatch(command_e(commands.getCommandRaw()));
 
 #ifndef DISABLE_NFC
-	chip_card.wakeCard();
+	chip_card.enableRFField();
 	SM_tonuino::dispatch(card_e(chip_card.getCardEvent()));
-	chip_card.sleepCard();
+	chip_card.disableRFField();
 #endif // !DISABLE_NFC
 
 	unsigned long stop_cycle = millis();
@@ -343,6 +320,18 @@ void Tonuino::OnPlayFinished(uint16_t track)
 	mp3.OnPlayFinished(track);
 }
 
+void Tonuino::SetSleepTimeout(uint8_t time)
+{
+	cli();
+	wdt_reset();
+	wdt_disable();
+	MCUSR &= ~(1 << WDRF);
+	WDTCSR = (1 << WDCE) | (1 << WDE);
+	WDTCSR = time;
+	WDTCSR |= 1 << WDIE | (0 << WDE);
+	sei();
+}
+
 bool Tonuino::specialCard(const nfcTagObject& nfcTag)
 {
 	ChangeLoopModifier(LoopModifier::LoopModifierId::Active);
@@ -419,7 +408,7 @@ void Tonuino::ReactOnWakeup(WakeupSource source)
 	case WakeupSource::KeyInput:
 	{
 		LOG(loop_log, s_info, F("KI"));
-		//commands.getCommandRaw();
+		commands.getCommandRaw();
 		ChangeLoopModifier(LoopModifier::LoopModifierId::KeyRead);
 		break;
 	}

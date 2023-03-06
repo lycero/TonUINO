@@ -33,6 +33,8 @@ void setup() {
 
   digitalWrite(resetPin, HIGH);
   pinMode(resetPin, OUTPUT);
+  pinMode(cardPowerDownPin, OUTPUT);
+  digitalWrite(cardPowerDownPin, HIGH);
 
   pinMode(dfPlayer_powerPin, OUTPUT);
   digitalWrite(dfPlayer_powerPin, 0);
@@ -60,7 +62,6 @@ void setup() {
   LOG(init_log, s_debug, F("Information and contribution at https://tonuino.de.\n"));
 
   Tonuino::getTonuino().setup();
-  LOG(init_log, s_debug, F("finished setup"));
 }
 
 void loop() {

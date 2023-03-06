@@ -55,6 +55,7 @@ public:
   void ResetKeepAwake();
   void executeSleep();
   void OnPlayFinished(uint16_t track);
+  void SetSleepTimeout(uint8_t timeout);
 
   Mp3&      getMp3      () { return mp3      ; }
   Commands& getCommands () { return commands ; }

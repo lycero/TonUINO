@@ -69,7 +69,8 @@ namespace LoopModifier {
 		LoopModifierId GetModifierId() final { return LoopModifierId::CardRead; }
 		void Init() final;
 		void Loop() final;
-		void UpdateTimer(unsigned long timeout) final;;
+		void UpdateTimer(unsigned long timeout) final;
+		void HandleModifierChange(LoopModifierId newModifier) final;
 		LoopModifierId GetTransition() final;
 		void EndCycle(unsigned long startCycle) final;
 	private:

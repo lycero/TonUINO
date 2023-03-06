@@ -55,7 +55,8 @@ inline constexpr uint32_t  buttonDbTime = 25; // Debounce time in milliseconds (
 inline constexpr uint32_t cardCookie = 0x1337b347;
 inline constexpr uint8_t  cardVersion = 0x02;
 inline constexpr uint8_t  cardRemoveDelay = 1;
-inline constexpr unsigned long cardSleep = 1000;
+inline constexpr uint8_t  cardPowerDownPin = 3;
+inline constexpr unsigned long cardSleep = 250;
 
 // ####### mp3 #########################################
 inline constexpr uint8_t       maxTracksInFolder = 100;
@@ -81,6 +82,8 @@ inline constexpr unsigned long baseTimeMulti = 1000;
 inline constexpr uint8_t openAnalogPin = A7;
 inline constexpr unsigned long cycleTime = 50;
 inline constexpr uint8_t sleepCycleTime = WDTO_2S;
+inline constexpr uint8_t deepSleepCycleTime = WDTO_2S;
+inline constexpr uint8_t cardReadSleepTime = WDTO_1S;
 inline constexpr unsigned long keyReadTimerDuration = buttonLongPress * 2;
 inline constexpr unsigned long cardReadTimerDuration = 30 * baseTimeMulti;
 inline constexpr unsigned long lightSleepTimerDuration = 30 * baseTimeMulti;
