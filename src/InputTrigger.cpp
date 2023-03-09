@@ -15,8 +15,10 @@ InputTrigger::InputTrigger() : _state(INITAL_STATE)
 void InputTrigger::begin()
 {
 	PCICR |= B00000100;// enable interrupt for the group
-	PCMSK2 |= B11110000;
-	//_state = INITAL_STATE;
+	if(_deepSleep)
+		PCMSK2 |= B01000000;
+	else
+		PCMSK2 |= B11110000;
 	//get current state
 	TriggerOnHigh(dfPlayer_busyPin, B0001);
 	TriggerOnLow(buttonPausePin, B0010);
@@ -27,6 +29,11 @@ void InputTrigger::begin()
 void InputTrigger::stop()
 {
 	PCICR &= ~B00000100;// disable interrupt for the group
+}
+
+void InputTrigger::ChangeMode(bool deepSleep)
+{
+	_deepSleep = deepSleep;
 }
 
 TriggerEvent InputTrigger::GetEvent()

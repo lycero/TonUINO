@@ -164,7 +164,7 @@ void LightSleep::EndCycle(unsigned long start_cycle)
 
 //DeepSleep
 void DeepSleep::Init()
-{	
+{
 	digitalWrite(dfPlayer_ampPin, 1);
 	tonuino.SetSleepTimeout(deepSleepCycleTime);
 	_delayTimer.start(deepSleepTimerDuration);
@@ -204,9 +204,8 @@ void DeepSleep::EndCycle(unsigned long startCycle)
 //VeryDeepSleep
 void VeryDeepSleep::Init()
 {
-	mp3.goSleep();
-	delay(200);
-	digitalWrite(dfPlayer_powerPin, 0);
+	tonuino.ChangeTriggerMode(true);
+	tonuino.Mp3ShutDown();
 }
 
 void VeryDeepSleep::Loop()
@@ -216,17 +215,19 @@ void VeryDeepSleep::Loop()
 void VeryDeepSleep::HandleModifierChange(LoopModifierId newModifier)
 {
 	wdt_reset();
-	if (loop_log::will_log(s_debug)) 
-	{
-		LOG(loop_log, s_debug, F("Reset"));
-		delay(500);
-	}
-	digitalWrite(resetPin, 0);
+	tonuino.ChangeTriggerMode(false);
+	tonuino.Mp3Init();
+	SM_tonuino::dispatch(command_e(commandRaw::start));
 }
 
 void VeryDeepSleep::EndCycle(unsigned long startCycle)
 {
-	tonuino.executeSleep();
+	tonuino.executeSleep(true);
+}
+
+LoopModifierId VeryDeepSleep::GetTransition()
+{
+	return LoopModifierId::None;
 }
 
 // BeginPlay

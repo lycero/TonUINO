@@ -34,7 +34,7 @@ public:
   static Tonuino& getTonuino() { static Tonuino tonuino; return tonuino; }
 
   void setup          ();
-  void loop           (WakeupSource source);
+  void loop           ();
   void ChangeLoopModifier(LoopModifier::LoopModifierId id);
   void runActiveLoop  ();
 
@@ -53,7 +53,11 @@ public:
 
   void keepAwake();
   void ResetKeepAwake();
-  void executeSleep();
+  void executeSleep(bool deepSleep = false);
+  void Mp3Init();
+  void Mp3ShutDown();
+  void WelcomeAndActivateCard();
+  void ChangeTriggerMode(bool deepSleep);
   void OnPlayFinished(uint16_t track);
   void SetSleepTimeout(uint8_t timeout);
 

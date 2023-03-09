@@ -19,28 +19,8 @@
 	Information and contribution at https://tonuino.de.
 */
 
-volatile bool watchDogToggle = true;
-// Watchdog timer Interrupt Service Routine
-ISR(WDT_vect) {
-  watchDogToggle = true;
-}
-
 void setup() {
   Serial.begin(115200);  // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
-  pinMode(buttonPausePin, INPUT_PULLUP);
-  pinMode(buttonUpPin, INPUT_PULLUP);
-  pinMode(buttonDownPin, INPUT_PULLUP);
-
-  digitalWrite(resetPin, HIGH);
-  pinMode(resetPin, OUTPUT);
-  pinMode(cardPowerDownPin, OUTPUT);
-  digitalWrite(cardPowerDownPin, HIGH);
-
-  pinMode(dfPlayer_powerPin, OUTPUT);
-  digitalWrite(dfPlayer_powerPin, 0);
-
-  digitalWrite(dfPlayer_ampPin, 1);
-  pinMode(dfPlayer_ampPin, OUTPUT);
 
   // Wert für randomSeed() erzeugen durch das mehrfache Sammeln von rauschenden LSBs eines offenen Analogeingangs
   uint32_t ADC_LSB = 0;
@@ -64,13 +44,7 @@ void setup() {
   Tonuino::getTonuino().setup();
 }
 
-void loop() {
-  if (watchDogToggle) 
-  {
-    watchDogToggle = false;
-    Tonuino::getTonuino().loop(WakeupSource::Watchdog);
-  } else 
-  {
-    Tonuino::getTonuino().loop(WakeupSource::None);
-  }
+void loop() 
+{
+  Tonuino::getTonuino().loop();
 }

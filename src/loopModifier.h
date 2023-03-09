@@ -125,6 +125,7 @@ namespace LoopModifier {
 		void Loop() final;
 		void HandleModifierChange(LoopModifierId newModifier) final;
 		void EndCycle(unsigned long startCycle) final;
+		LoopModifierId GetTransition() final;
 	private:
 		Mp3& mp3;
 	};

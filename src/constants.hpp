@@ -34,7 +34,6 @@ inline constexpr uint32_t buttonLongPress = 1000; // timeout for long press butt
 inline constexpr uint8_t  buttonPausePin = 6;
 inline constexpr uint8_t  buttonUpPin = 5;
 inline constexpr uint8_t  buttonDownPin = 4;
-inline constexpr uint8_t  resetPin = A0;
 #else
 inline constexpr uint8_t  buttonPausePin = 62;
 inline constexpr uint8_t  buttonUpPin = 64;
@@ -86,7 +85,7 @@ inline constexpr uint8_t deepSleepCycleTime = WDTO_2S;
 inline constexpr uint8_t cardReadSleepTime = WDTO_1S;
 inline constexpr unsigned long keyReadTimerDuration = buttonLongPress * 2;
 inline constexpr unsigned long cardReadTimerDuration = 30 * baseTimeMulti;
-inline constexpr unsigned long lightSleepTimerDuration = 30 * baseTimeMulti;
+inline constexpr unsigned long lightSleepTimerDuration = 10 * baseTimeMulti;
 inline constexpr unsigned long deepSleepTimerDuration = 30 * 60 * baseTimeMulti;
 
 #endif /* SRC_CONSTANTS_HPP_ */

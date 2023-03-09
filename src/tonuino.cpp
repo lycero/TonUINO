@@ -19,13 +19,50 @@ namespace
 
 } // anonymous namespace
 
+volatile bool watchDogToggle = true;
+// Watchdog timer Interrupt Service Routine
+ISR(WDT_vect) {
+	watchDogToggle = true;
+}
+
+
 void Tonuino::setup()
 {
+	pinMode(cardPowerDownPin, OUTPUT);
+	digitalWrite(cardPowerDownPin, HIGH);
+
+	pinMode(dfPlayer_powerPin, OUTPUT);
+	digitalWrite(dfPlayer_powerPin, 0);
+
+	digitalWrite(dfPlayer_ampPin, 1);
+	pinMode(dfPlayer_ampPin, OUTPUT);
+
+	pinMode(buttonPausePin, INPUT_PULLUP);
+	pinMode(buttonUpPin, INPUT_PULLUP);
+	pinMode(buttonDownPin, INPUT_PULLUP);
+
 	SetSleepTimeout(sleepCycleTime);
 
 	// load Settings from EEPROM
 	settings.loadSettingsFromFlash();
 
+	Mp3Init();
+
+	// RESET --- ALLE DREI KNÖPFE BEIM STARTEN GEDRÜCKT HALTEN -> alle EINSTELLUNGEN werden gelöscht
+	if (buttons.isReset())
+	{
+		settings.clearEEPROM();
+		settings.loadSettingsFromFlash();
+	}
+
+	SM_tonuino::start();
+
+	WelcomeAndActivateCard();
+}
+
+void Tonuino::Mp3Init()
+{
+	pinMode(dfPlayer_busyPin, dfPlayer_busyPinType == levelType::activeHigh ? INPUT : INPUT_PULLUP);
 	digitalWrite(dfPlayer_powerPin, 1);
 	delay(25);
 	// DFPlayer Mini initialisieren
@@ -35,25 +72,32 @@ void Tonuino::setup()
 	digitalWrite(dfPlayer_ampPin, 0);
 	mp3.setVolume();
 	mp3.setEq(static_cast<DfMp3_Eq>(settings.eq - 1));
+}
 
-	LOG(init_log, s_debug, F("MP3 State:"), mp3.GetStatus());
+void Tonuino::Mp3ShutDown()
+{
+	mp3.SerialStopListening();
+	mp3.goSleep();
+	delay(200);
+	digitalWrite(dfPlayer_powerPin, 0);
+	digitalWrite(dfPlayer_ampPin, 1);
+	pinMode(dfPlayer_busyPin, OUTPUT);
+	digitalWrite(dfPlayer_busyPin, 0);
+	pinMode(dfPlayer_receivePin, OUTPUT);
+	digitalWrite(dfPlayer_receivePin, 0);
+	pinMode(dfPlayer_transmitPin, OUTPUT);
+	digitalWrite(dfPlayer_transmitPin, 0);
+}
 
-	// RESET --- ALLE DREI KNÖPFE BEIM STARTEN GEDRÜCKT HALTEN -> alle EINSTELLUNGEN werden gelöscht
-	if (buttons.isReset())
-	{
-		settings.clearEEPROM();
-		settings.loadSettingsFromFlash();
-	}
-
-	//ChangeLoopModifier(LoopModifier::LoopModifierId::Active);
-	SM_tonuino::start();
+void Tonuino::WelcomeAndActivateCard()
+{
 	// Start Shortcut "at Startup" - e.g. Welcome Sound
 	SM_tonuino::dispatch(command_e(commandRaw::start));
 
 	ChangeLoopModifier(LoopModifier::LoopModifierId::CardRead);
 }
 
-void Tonuino::loop(WakeupSource source)
+void Tonuino::loop()
 {
 	auto trigger = triggerHandler.GetEvent();
 	if (trigger == TriggerEvent::MP3) {
@@ -62,8 +106,14 @@ void Tonuino::loop(WakeupSource source)
 	else if (trigger == TriggerEvent::Pause || trigger == TriggerEvent::Volume) {
 		internalLoop(WakeupSource::KeyInput);
 	}
-	else {
-		internalLoop(source);
+	else if (watchDogToggle)
+	{
+		watchDogToggle = false;
+		internalLoop(WakeupSource::Watchdog);
+	}
+	else
+	{
+		internalLoop(WakeupSource::None);
 	}
 }
 
@@ -135,31 +185,31 @@ void Tonuino::ChangeLoopModifier(LoopModifier::LoopModifierId id)
 			break;
 		}
 		case LoopModifier::LoopModifierId::Active: {
-			LOG(loop_log, s_debug, F("# -> Active"));
+			LOG(loop_log, s_info, F("# -> Active"));
 			break;
 		}
 		case LoopModifier::LoopModifierId::KeyRead: {
-			LOG(loop_log, s_debug, F("# -> KeyRead"));
+			LOG(loop_log, s_info, F("# -> KeyRead"));
 			break;
 		}
 		case LoopModifier::LoopModifierId::CardRead: {
-			LOG(loop_log, s_debug, F("# -> CardRead"));
+			LOG(loop_log, s_info, F("# -> CardRead"));
 			break;
 		}
 		case LoopModifier::LoopModifierId::BeginPlay: {
-			LOG(loop_log, s_debug, F("# -> BeginPlay"));
+			LOG(loop_log, s_info, F("# -> BeginPlay"));
 			break;
 		}
 		case LoopModifier::LoopModifierId::LightSleep: {
-			LOG(loop_log, s_debug, F("# -> LightSleep"));
+			LOG(loop_log, s_info, F("# -> LightSleep"));
 			break;
 		}
 		case LoopModifier::LoopModifierId::DeepSleep: {
-			LOG(loop_log, s_debug, F("# -> DeepSleep"));
+			LOG(loop_log, s_info, F("# -> DeepSleep"));
 			break;
 		}
 		case LoopModifier::LoopModifierId::VeryDeepSleep: {
-			LOG(loop_log, s_debug, F("# -> VeryDeepSleep"));
+			LOG(loop_log, s_info, F("# -> VeryDeepSleep"));
 			break;
 		}
 		default:
@@ -384,7 +434,7 @@ void Tonuino::internalLoop(WakeupSource source)
 			delay(cycleTime - (stop_cycle - start_cycle));
 		return;
 	}
-	activeLoopModifier->EndCycle(start_cycle);	
+	activeLoopModifier->EndCycle(start_cycle);
 }
 
 void Tonuino::ReactOnWakeup(WakeupSource source)
@@ -473,10 +523,15 @@ unsigned long Tonuino::getWatchDogMillis(uint8_t time)
 	return 15;
 }
 
-void Tonuino::executeSleep()
+void Tonuino::ChangeTriggerMode(bool deepSleep)
+{
+	triggerHandler.ChangeMode(deepSleep);
+}
+
+void Tonuino::executeSleep(bool deepSleep)
 {
 	wdt_reset();
-	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+
 	cli();
 	sleep_enable();
 	// Disable digital input buffers on all ADC0-ADC5 pins
@@ -495,20 +550,20 @@ void Tonuino::executeSleep()
 	pinMode(SCL, INPUT);
 	digitalWrite(SDA, LOW);
 	digitalWrite(SCL, LOW);
-	mp3.SerialStopListening();
-	power_adc_disable();
-	power_usart0_disable();
-	power_spi_disable();
-	power_timer0_disable();
-	power_timer1_disable();
-	power_timer2_disable();
-	//power_twi_disable();
+	if (!deepSleep)
+		mp3.SerialStopListening();
 	triggerHandler.begin();
+	ADCSRA &= ~(1 << ADEN);
+	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+	sleep_enable();
+	sleep_bod_disable();
 	sei();
 	sleep_cpu();
 	sleep_disable();
 	power_twi_enable();
 	power_all_enable();
+	ADCSRA |= (1 << ADEN);
 	triggerHandler.stop();
-	mp3.SerialStartListening();
+	if (!deepSleep)
+		mp3.SerialStartListening();
 }

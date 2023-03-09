@@ -17,6 +17,7 @@ public:
 	InputTrigger();
 	void begin();
 	void stop();
+	void ChangeMode(bool deepSleep);
 	TriggerEvent GetEvent();
 private:
 	bool IsTriggerChanged(uint8_t pin, int stateMask);
@@ -25,5 +26,6 @@ private:
 	bool TriggerOnHigh(uint8_t pin, int stateMaskt);
 	bool TriggerOnLow(uint8_t pin, int stateMask);
 	uint8_t _state { 0 };
+	bool _deepSleep { 0 };
 };
 
