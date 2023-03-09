@@ -91,11 +91,9 @@ void CardRead::Loop()
 	if (!cardSleepTimer.isExpired())
 			return;
 
-#ifndef DISABLE_NFC
 	card.enableRFField();
 	SM_tonuino::dispatch(card_e(card.getCardEvent()));
 	card.disableRFField();
-#endif // !DISABLE_NFC
 
 	cardSleepTimer.start(cardSleep);
 }

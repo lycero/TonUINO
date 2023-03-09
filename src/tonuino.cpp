@@ -177,7 +177,7 @@ void Tonuino::ChangeLoopModifier(LoopModifier::LoopModifierId id)
 	activeLoopModifier->HandleModifierChange(id);
 	activeLoopModifier = newModifier;
 
-	if (loop_log::will_log(s_debug))
+	if (loop_log::will_log(s_info))
 	{
 		switch (id)
 		{
@@ -230,11 +230,9 @@ void Tonuino::runActiveLoop()
 
 	SM_tonuino::dispatch(command_e(commands.getCommandRaw()));
 
-#ifndef DISABLE_NFC
 	chip_card.enableRFField();
 	SM_tonuino::dispatch(card_e(chip_card.getCardEvent()));
 	chip_card.disableRFField();
-#endif // !DISABLE_NFC
 
 	unsigned long stop_cycle = millis();
 	if (stop_cycle - start_cycle < cycleTime)
