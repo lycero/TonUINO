@@ -54,6 +54,7 @@ inline constexpr uint8_t       dfPlayer_transmitPin = 9;
 inline constexpr uint8_t       dfPlayer_busyPin = 7;
 inline constexpr uint8_t       dfPlayer_ampPin = 11;
 inline constexpr uint8_t       dfPlayer_powerPin = 12;
+inline constexpr uint8_t       dfPlayer_headPhonePin = 2;
 inline constexpr levelType     dfPlayer_busyPinType = levelType::activeLow;
 inline constexpr unsigned long dfPlayer_timeUntilStarts = 3000;
 

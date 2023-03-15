@@ -41,6 +41,8 @@ void Tonuino::setup()
 	pinMode(buttonUpPin, INPUT_PULLUP);
 	pinMode(buttonDownPin, INPUT_PULLUP);
 
+	pinMode(dfPlayer_headPhonePin, INPUT_PULLUP);
+
 	SetSleepTimeout(sleepCycleTime);
 
 	// load Settings from EEPROM

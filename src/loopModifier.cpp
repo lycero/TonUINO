@@ -134,10 +134,13 @@ void LightSleep::Init()
 
 void LightSleep::Loop()
 {
+
 	mp3.loop();
 	SM_tonuino::dispatch(command_e(commandRaw::none));
 	if (mp3.isPlaying())
 		_delayTimer.start(lightSleepTimerDuration);
+
+	digitalWrite(dfPlayer_ampPin, !digitalRead(dfPlayer_headPhonePin));
 }
 
 void LightSleep::UpdateTimer(unsigned long timeout) 
