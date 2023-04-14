@@ -321,6 +321,7 @@ void Tonuino::playTrackNumber()
 	const uint8_t advertTrack = mp3.getCurrentTrack();
 	if (advertTrack != 0)
 		mp3.playAdvertisement(advertTrack);
+	delay(3000);
 }
 
 // Leider kann das Modul selbst keine Queue abspielen, daher müssen wir selbst die Queue verwalten
@@ -468,11 +469,12 @@ void Tonuino::ReactOnWakeup(WakeupSource source)
 	{
 		LOG(loop_log, s_info, F("Mp3BC"));
 		myKeepAwake++;
-		//if (!SM_tonuino::is_in_state<Play>())
-		//	break;
 
-		//if (!(mp3.isPlayingFolder() || mp3.isPlayingMp3()) || mp3.isPlaying())
-		//	break;
+		if (!SM_tonuino::is_in_state<Play>())
+			break;
+
+		if (!(mp3.isPlayingFolder() || mp3.isPlayingMp3()) || mp3.isPlaying())
+			break;
 
 		mp3.getStatus();
 

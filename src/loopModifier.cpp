@@ -50,13 +50,16 @@ LoopModifierId KeyRead::GetTransition()
 	if(_lastCommand == commandRaw::pause)
 		return LoopModifierId::CardRead;
 
-	if (digitalRead(buttonPausePin))
+	if (_lastCommand == commandRaw::pauseLong)
+		return LoopModifierId::LightSleep;
+
+	if (!digitalRead(buttonPausePin))
 		return LoopModifierId::None;
 
-	if (digitalRead(buttonUpPin))
+	if (!digitalRead(buttonUpPin))
 		return LoopModifierId::None;
 
-	if (digitalRead(buttonDownPin))
+	if (!digitalRead(buttonDownPin))
 		return LoopModifierId::None;
 
 	if (_delayTimer.isExpired())

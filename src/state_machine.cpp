@@ -34,7 +34,6 @@ const __FlashStringHelper* str_Admin_CardsForFolder    () { return F("AdmCardsFo
 const __FlashStringHelper* str_Admin_InvButtons        () { return F("AdmInvButtons") ; }
 const __FlashStringHelper* str_Admin_ResetEeprom       () { return F("AdmResetEeprom") ; }
 const __FlashStringHelper* str_Admin_LockAdmin         () { return F("AdmLockAdmin") ; }
-const __FlashStringHelper* str_Admin_PauseIfCardRemoved() { return F("AdmPauseIfCardRem") ; }
 const __FlashStringHelper* str_VoiceMenu               () { return F("VoiceMenu") ; }
 const __FlashStringHelper* str_to                      () { return F(" -> ") ; }
 const __FlashStringHelper* str_enter                   () { return F("enter ") ; }
@@ -279,14 +278,6 @@ private:
   Settings::pin_t pin;
   uint8_t         pin_number;
 };
-
-class Admin_PauseIfCardRemoved: public Admin_BaseSetting
-{
-public:
-  void entry() final;
-  void react(command_e const &) final;
-};
-
 
 // #######################################################
 
@@ -623,10 +614,22 @@ void Base::handleShortcut(uint8_t shortCut) {
       tonuino.setFolder(&settings.shortCuts[shortCut]);
     if (tonuino.getCard().nfcFolderSettings.folder != 0) {
       LOG(state_log, s_debug, str_Base(), str_to(), str_StartPlay());
-      tonuino.ChangeLoopModifier(LoopModifier::LoopModifierId::LightSleep);
+      //tonuino.ChangeLoopModifier(LoopModifier::LoopModifierId::LightSleep);
       transit<StartPlay>();
     }
   }
+}
+
+void Base::repeatLastCard()
+{
+    if (lastCardRead.nfcFolderSettings.mode != mode_t::repeat_last)
+        tonuino.setCard(lastCardRead);
+    if (tonuino.getCard().nfcFolderSettings.folder != 0) {
+        LOG(state_log, s_debug, str_Base(), str_to(), str_StartPlay());
+        transit<StartPlay>();
+        tonuino.ChangeLoopModifier(LoopModifier::LoopModifierId::BeginPlay);
+        delay(1000);
+    }
 }
 
 void Base::handleReadCard() {
@@ -658,11 +661,15 @@ void Idle::react(command_e const &cmd_e) {
     transit<Admin_Allow>();
     return;
   case command::pause:
-  case command::track:
     if (tonuino.getActiveModifier().handlePause())
       break;
     shortCut = 0;
     break;
+  case command::track:
+      if (tonuino.getActiveModifier().handlePause())
+          break;
+      shortCut = 4;
+      break;
   case command::volume_up:
     if (tonuino.getActiveModifier().handleVolumeUp())
       break;
@@ -692,6 +699,9 @@ void Idle::react(command_e const &cmd_e) {
 
   if (shortCut == 3)
     mp3.enqueueMp3FolderTrack(mp3Tracks::t_262_pling);
+
+  if (shortCut == 4)
+      repeatLastCard();
 
   handleShortcut(shortCut);
 };
@@ -784,10 +794,6 @@ void Play::react(card_e const &c_e) {
       handleReadCard();
     return;
   case cardEvent::removed:
-    if (settings.pauseWhenCardRemoved && not tonuino.getActiveModifier().handlePause()) {
-      transit<Pause>();
-      return;
-    }
     break;
   default:
     break;
@@ -859,10 +865,6 @@ void Pause::react(card_e const &c_e) {
   switch (c_e.card_ev) {
   case cardEvent::inserted:
     if (readCard()) {
-      if (settings.pauseWhenCardRemoved && tonuino.getCard() == lastCardRead && not tonuino.getActiveModifier().handlePause()) {
-        transit<Play>();
-        return;
-      }
       handleReadCard();
     }
     return;
@@ -1130,10 +1132,6 @@ void Admin_Entry::react(command_e const &cmd_e) {
     case 12: // lock admin menu
              LOG(state_log, s_debug, str_Admin_Entry(), str_to(), str_Admin_LockAdmin());
              transit<Admin_LockAdmin>();
-             return;
-    case 13: // Pause, wenn Karte entfernt wird
-             LOG(state_log, s_debug, str_Admin_Entry(), str_to(), str_Admin_PauseIfCardRemoved());
-             transit<Admin_PauseIfCardRemoved>();
              return;
     }
   }
@@ -1629,38 +1627,6 @@ void Admin_LockAdmin::react(command_e const &cmd_e) {
   }
 };
 
-// #######################################################
-
-void Admin_PauseIfCardRemoved::entry() {
-  LOG(state_log, s_info, str_enter(), str_Admin_PauseIfCardRemoved());
-
-  numberOfOptions   = 2;
-  startMessage      = mp3Tracks::t_913_pause_on_card_removed;
-  messageOffset     = mp3Tracks::t_933_switch_volume_intro;
-  preview           = false;
-  previewFromFolder = 0;
-
-  VoiceMenu::entry(false);
-};
-
-void Admin_PauseIfCardRemoved::react(command_e const &cmd_e) {
-  if (cmd_e.cmd_raw != commandRaw::none) {
-    LOG(state_log, s_debug, str_Admin_PauseIfCardRemoved(), F("::react() "), static_cast<int>(cmd_e.cmd_raw));
-  }
-  VoiceMenu::react(cmd_e);
-
-  if (isAbort(cmd_e))
-    return;
-
-  if ((cmd_e.cmd_raw == commandRaw::pause) && (currentValue != 0)) {
-    switch (currentValue) {
-    case 1: settings.pauseWhenCardRemoved = false; break;
-    case 2: settings.pauseWhenCardRemoved = true ; break;
-    }
-    saveAndTransit();
-    return;
-  }
-};
 
 // #######################################################
 

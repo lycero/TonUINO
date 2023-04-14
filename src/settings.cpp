@@ -51,7 +51,6 @@ void Settings::resetSettings() {
   adminMenuPin[1]     =  1;
   adminMenuPin[2]     =  1;
   adminMenuPin[3]     =  1;
-  pauseWhenCardRemoved= false;
 
   writeSettingsToFlash();
 }
@@ -65,7 +64,6 @@ void Settings::migrateSettings(int oldVersion) {
     adminMenuPin[1] = 1;
     adminMenuPin[2] = 1;
     adminMenuPin[3] = 1;
-    pauseWhenCardRemoved = false;
     writeSettingsToFlash();
   }
 }
@@ -87,7 +85,6 @@ void Settings::loadSettingsFromFlash() {
   LOG(settings_log, s_info, F("Inverted Vol Buttons: "   ), invertVolumeButtons);
   LOG(settings_log, s_info, F("Admin Menu locked: "      ), adminMenuLocked);
   LOG(settings_log, s_info, F("Admin Menu Pin: "         ), adminMenuPin[0], adminMenuPin[1], adminMenuPin[2], adminMenuPin[3]);
-  LOG(settings_log, s_info, F("Pause when card removed: "), pauseWhenCardRemoved);
 }
 
 void Settings::writeFolderSettingToFlash(uint8_t folder, uint16_t track) {

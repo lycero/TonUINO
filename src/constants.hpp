@@ -69,6 +69,6 @@ inline constexpr uint8_t cardReadSleepTime = WDTO_1S;
 inline constexpr unsigned long keyReadTimerDuration = buttonLongPress * 2;
 inline constexpr unsigned long cardReadTimerDuration = 30 * baseTimeMulti;
 inline constexpr unsigned long lightSleepTimerDuration = 10 * baseTimeMulti;
-inline constexpr unsigned long deepSleepTimerDuration = 10 * 1 * baseTimeMulti;
+inline constexpr unsigned long deepSleepTimerDuration = 10 * 60 * baseTimeMulti;
 
 #endif /* SRC_CONSTANTS_HPP_ */
