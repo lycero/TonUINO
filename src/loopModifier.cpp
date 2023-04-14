@@ -160,6 +160,27 @@ void LightSleep::EndCycle(unsigned long start_cycle)
 	unsigned long stop_cycle = millis();
 	if (stop_cycle - start_cycle < cycleTime)
 		delay(cycleTime - (stop_cycle - start_cycle));
+
+	//check playstate as it could have changed while not receiving events
+	if (SM_tonuino::is_in_state<Play>() && !mp3.isPlaying())
+	{
+		uint8_t count = 0;
+		mp3.getStatus();// also drains any responses
+		while (!mp3.isPlaying() && count < 50) 
+		{
+			delay(100);
+			++count;
+		}
+
+		if (!mp3.isPlaying()) 
+		{
+			mp3.OnPlayFinished(mp3.getCurrentTrackFromPlayer());
+			delay(2000);
+		}
+
+		return;
+	}	
+
 	tonuino.executeSleep();
 }
 

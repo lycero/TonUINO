@@ -54,7 +54,7 @@ namespace LoopModifier {
 		void Init() final;
 		LoopModifierId GetModifierId() final { return LoopModifierId::KeyRead; }
 		void Loop() final;
-		void UpdateTimer(unsigned long timeout) final;;
+		void UpdateTimer(unsigned long timeout) final;
 		LoopModifierId GetTransition() final;
 		void EndCycle(unsigned long startCycle) final;
 
@@ -96,7 +96,7 @@ namespace LoopModifier {
 		LoopModifierId GetModifierId() final { return LoopModifierId::LightSleep; }
 		void Init() final;
 		void Loop() final;
-		void UpdateTimer(unsigned long timeout) final;;
+		void UpdateTimer(unsigned long timeout) final;
 		LoopModifierId GetTransition() final;
 		void EndCycle(unsigned long startCycle) final;
 	private:

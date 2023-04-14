@@ -73,6 +73,7 @@ void Tonuino::Mp3Init()
 	delay(2000);
 	digitalWrite(dfPlayer_ampPin, 0);
 	mp3.setVolume();
+	mp3.stop();
 	mp3.setEq(static_cast<DfMp3_Eq>(settings.eq - 1));
 }
 
@@ -472,6 +473,8 @@ void Tonuino::ReactOnWakeup(WakeupSource source)
 
 		//if (!(mp3.isPlayingFolder() || mp3.isPlayingMp3()) || mp3.isPlaying())
 		//	break;
+
+		mp3.getStatus();
 
 		if (activeLoopModifier->GetModifierId() == LoopModifier::LoopModifierId::KeyRead)
 			break;
