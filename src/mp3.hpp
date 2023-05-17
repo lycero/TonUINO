@@ -13,7 +13,8 @@
 #define CHECK_MISSING_ONPLAYFINISHED
 enum class mp3Tracks: uint16_t {
   t_0                          =   0,
-  t_262_pling                  = 262,
+  t_263_whoo                   = 263,
+  t_264_welcome                = 264,
   t_300_new_tag                = 300,
   t_301_select_folder          = 301,
   t_310_select_mode            = 310,

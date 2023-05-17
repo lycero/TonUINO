@@ -698,7 +698,7 @@ void Idle::react(command_e const &cmd_e) {
   }
 
   if (shortCut == 3)
-    mp3.enqueueMp3FolderTrack(mp3Tracks::t_262_pling);
+    mp3.enqueueMp3FolderTrack(mp3Tracks::t_264_welcome);
 
   if (shortCut == 4)
       repeatLastCard();
@@ -879,7 +879,7 @@ void Pause::react(card_e const &c_e) {
 
 void StartPlay::entry() {
   LOG(state_log, s_info, str_enter(), str_StartPlay());
-  mp3.enqueueMp3FolderTrack(mp3Tracks::t_262_pling);
+  mp3.enqueueMp3FolderTrack(mp3Tracks::t_263_whoo);
 };
 
 void StartPlay::react(command_e const &/*cmd_e*/) {

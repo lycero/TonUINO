@@ -3,7 +3,7 @@
 
 #include "log.hpp"
 
-DEFINE_LOGGER(tonuino_log   , s_info, void);
+DEFINE_LOGGER(tonuino_log   , s_none, void);
   
 DEFINE_LOGGER(init_log      , s_none, tonuino_log);
 DEFINE_LOGGER(card_log      , s_info, tonuino_log);
