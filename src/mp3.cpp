@@ -153,6 +153,10 @@ void Mp3::playCurrent() {
 #endif
       playing = play_folder;
     }
+    else if (current_track >= q.size())
+    {
+        current_track = 0;
+    }
   }
   Tonuino::getTonuino().keepAwake();
 }
